@@ -1,0 +1,198 @@
+\documentclass[11pt]{article}
+
+\usepackage{booktabs}
+\usepackage{homeworkpkg}
+\usepackage{enumitem}
+
+%% Local Macros and packages: add any of your own definitions here.
+
+\begin{document}
+
+% Homework number, your name and NetID, and optionally, the names/NetIDs of anyone you collaborated with. If you did not collaborate with anybody, leave the last parameter empty.
+\homework
+    {1}
+    {Nestor Alejandro Bermudez Sarmiento (nab6)}
+    {}
+
+For all the questions below, whenever a sum or a max operation appears it corresponds to a \textit{sum} or \textit{max} function available in Python's standard library. Both of which accept a list of values as an argument.\\
+Wherever the size of the vector ($n$) is needed I use the \textit{len} function.\\
+All the results are rounded to 3 decimal positions.
+
+\section*{Question 1}
+The \textit{Question1.656944870.py} file implements the various statistical descriptions of the online scores data set.\\
+Since we are asked to calculate the quartiles of the data one of the first things the program does is to sort the array of scores.\\
+
+\begin{enumerate}[label=(\alph*)]
+\item MAX: since the data is sorted we only need to pick the last element; its value is \textbf{100.0}.
+
+\item MIN: since the data is sorted we only need to pick the first element; its value is \textbf{37.0}
+
+\item Quartiles: I implemented a function called \textit{median} which, based on the length of the vector, it calculates the median. To calculate the quartiles I executed the median function over the entire vector and over the vector \textbf{H\textsubscript{1}} and \textbf{ H\textsubscript{2}} where they were obtained by splitting the original vector in two.\\
+As a result, the quartiles are:\\
+\begin{nscenter}
+ Q\textsubscript{1} = \textbf{68.0}, 
+ Q\textsubscript{2} (median) = \textbf{77.0} and
+ Q\textsubscript{3} = \textbf{87.0}
+\end{nscenter}
+
+\item Mean: as we know, the mean is calculated by summing all the values in the vector and then dividing by the length of the vector. The \textit{mean} function does exactly that. After executing it over our online score data set the calculated mean is \textbf{76.715}.
+
+\item Mode: the \textit{mode} function takes a vector and finds the element(s) with the highest frequency. To do so, it first creates a \textit{frequencies} dictionary where the keys are the scores from our data set and the values are the number of times such values appears in the data set. Then it finds the maximum frequency and, finally, it looks for all the elements for which the frequency matches the maximum frequency. As a result, two modes are found: \textbf{77.0} and \textbf{83.0}.
+
+\item Empirical Variance: the \textit{variance} function implements the following formula
+\[ \sigma^2 = \frac{\displaystyle \sum ^n_{i=1}(x_i - \mu)^2} {n - 1} \]\\
+Executing the \textit{variance} function over the online scores data set we obtain \textbf{173.279}.
+
+\end{enumerate}
+
+\newpage \nocite{*}
+
+\section*{Question 2}
+Over the same data set for online scores we will perform z-score normalization and find the correlation and covariance between the mid-term scores and final scores. The $z$-score is given by
+
+\[ z = \frac{x - \mu}{\sigma} \]
+
+where $\mu$ is the mean of the values and $\sigma$ is the standard deviation. This is implemented in the \textit{Question2.656944870.py} file by implementing the \textit{mean}, \textit{variance} and \textit{standard deviation} functions. Some of which reuse the code written for Question 1.
+
+\begin{enumerate}[label=(\alph*)]
+\item Empirical variance before and after normalization. Before: \textbf{173.279}, After: \textbf{1.0}
+
+\item Normalize the original value 90: just apply the formula above to $x = 90$ and the result is \textbf{1.009}
+
+\item Pearson's correlation coefficient: this is given by the 
+\[ r =\frac{\displaystyle \sum ^n _{i=1}(a_i - \bar{A})(b_i - \bar{B})}{\sqrt{\displaystyle \sum ^n _{i=1}(a_i - \bar{A})^2} \sqrt{\displaystyle \sum ^n _{i=1}(b_i - \bar{B})^2}} \]
+
+where:\\
+$n$ is the number of samples\\
+$a_i, b_i$ are the single samples indexed with $i$\\
+$\bar{A}=\frac{1}{n}\sum_{i=1}^n x_i$ (the mean of the samples); and analogously for $\bar{B}$.\\
+
+The Python program implements it by first calculating the mean for both samples and uses list comprehension to calculate the numerator of the formula and two more list comprehensions to calculate the denominator.
+
+After applying the function to the midterm and final scores we get a $r = \textbf{0.544}$
+
+\item Covariance between the midterm and final scores. 
+
+\[ \frac{\displaystyle \sum ^n_{i=1} (a_i - \bar{A})(b_i - \bar{B})}{n} \]
+
+where the variables are defined as in the previous item.\\
+
+The Python program implements a function that calculates the mean (same as for the previous item) and uses list comprehension to calculate the covariance. Finally, instead of using $n$ as the denominator, the problem uses $n - 1$ as requested in the assignment. For the given midterm and final scores data sets the covariance is \textbf{78.254}
+
+\end{enumerate}
+\newpage \nocite{*}
+
+\section*{Question 3}
+Given the data sets for the book inventory for both CML and CBL libraries.\\
+
+\begin{enumerate}[label=(\alph*)]
+\item Jaccard similarity coefficient\\
+
+Given the following table, calculate the Jaccard similarity coefficient. \\
+
+\begin{center}
+\begin{tabular}{l*{3}{c}r}
+                                 & In CML & Not in CML \\
+\hline
+In CBL                      &        58 &                 2  \\
+Not in CBL               &      120 &                20 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+As described in the slides I'll drop the value for when a book is not present in either library (20) so
+\[ sim_{jaccard} = \frac{58}{58 + 2 + 120} \approx \textbf{0.322} \]
+
+\item Minkowski distance for $h = 1, 2$ and $\infty$\\
+I have implemented each of them using the list comprehension feature of Python under the \textit{Question3.656944870.py} file. I use the \textit{math} package for calculating the absolute value and square roots where needed. 
+
+\begin{enumerate}[label=\roman*.]
+\item For $h = 1$ (Manhattan distance),
+
+\[ L_0 = \sum ^n_{i=1}|a_i - b_i|  \]
+where $a_i$ is the book inventory for CML and $b_i$ is the book inventory for CBL.\\
+As a result we obtain: \textbf{6152.0}
+
+\item For $h = 2$ (Euclidean distance),
+\[ L_1 = \sqrt{\sum ^n_{i=1}(a_i - b_i)^2}  \]
+where $a_i$ is the book inventory for CML and $b_i$ is the book inventory for CBL.\\
+As a result we obtain: \textbf{715.328}
+
+\item For $h = \infty$ (Supremum distance),
+\[ L_\infty = max | a_i - b_i | \]
+where $a_i$ is the book inventory for CML and $b_i$ is the book inventory for CBL.\\
+As a result we obtain: \textbf{170.0}
+\end{enumerate}
+
+\item Cosine similarity,
+\[ cos(A, B) = \frac{A\bullet B}{\norm{A} \times \norm{B}} \]
+where $A$ is the book inventory vector for CML and $B$ is the one for CBL.\\
+This function has been implemented in \textit{Question3.656944870.py} Python program under the name \textit{cosine\_similarity}.\\
+As a result we obtain: \textbf{0.841}.\\
+
+\item KL Divergence,\\
+For this one we are assuming that the probabilistic distribution for CML's inventory is 
+\[ P(i) = \frac{a_i}{X} \]
+where $X$ is the total count of books in CML and $a_i$ is the count of the $i$th book.\\
+
+We will assume the same for CBL inventory and denote it by $Q$.\\
+
+As we know, 
+\[ D_{KL}(P\lVert Q) = \sum ^X_{i=1} P(i)log\frac{P(i)}{Q(i)} \]\\
+The \textit{kl\_divergence} function implements this by first calculating the total count of the books for both CML and CBL and then iterating over all the elements calculating $P(i)$ and $Q(i)$ for each of them. And finally sum all the calculated values\\
+As a result we obtain: \textbf{0.207}
+
+\end{enumerate}
+
+\newpage \nocite{*}
+
+\section*{Question 4}
+Using 
+\[ \chi^2 = \sum ^c_{i=1}\sum ^r_{j=1}\frac{(o\textsubscript{ij} - e\textsubscript{ij})^2}{e\textsubscript{ij}} \]
+
+Calculate $\chi^2$ correlation value given the table below.\\
+
+\begin{center}
+\begin{tabular}{l*{3}{c}r}
+                                     & Buy diaper & Do not buy diaper \\
+\hline
+Buy beer                      & 150 &    40  \\
+Do not buy beer          &   15 & 3300 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The Python program takes an arbitrary matrix (not necessarily 2x2) and it will calculate the sum of each column, sum of each row and $n$ (sum of all values). For this particular problem, the totals are
+
+\begin{center}
+\begin{tabular}{l*{3}{c}r}
+                                     & Buy diaper & \multicolumn{1}{c|}{Do not buy diaper}  & Total\\
+\hline
+Buy beer                      & 150 & \multicolumn{1}{c|}{40}     & 190   \\
+Do not buy beer          &   15 & \multicolumn{1}{c|}{3300} & 3315 \\
+\hline
+Total                             & 165& \multicolumn{1}{c|}{3340} & 3505 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+To calculate the sums of the columns and rows I use list comprehension.\\
+Once the values are calculated we just need to iterate over each item in the matrix ($c$ columns and $r$ rows) and use the observed and expected values. Where the expected values are calculated based on the sums of the columns, rows and $n$.\\
+
+The expected values for this data (rounded to 3 decimals in this report) are:
+\begin{center}
+\begin{tabular}{l*{3}{c}r}
+                                     & Buy diaper & Do not buy diaper \\
+\hline
+Buy beer                      & 8.944 &    181.056  \\
+Do not buy beer          & 156.056 & 3158.944 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Finally, the $\chi^2$ correlation value for the data above is \textbf{2468.183}.\\
+
+Additionally, the degrees of freedom this distribution is \[(c - 1)\times (r - 1) = (2 - 1)(2 - 1) = 1\].\\
+Which means that the $p$-value is very small and the null hypothesis of independence can be rejected. Therefore we can conclude that there is very strong evidence that there is a correlation between the purchase of beers and diapers. 
+
+\end{document}
