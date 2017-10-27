@@ -1,0 +1,7 @@
+*.pyc
+output*.txt
+data*.txt
+*.aux
+*.log
+*.out
+*.gz
