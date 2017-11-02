@@ -106,8 +106,8 @@ class OutlierFP:
 
         for x, y in ranges:
             seq = self.sequences[ seq_id ][ x:y + 1]
-            seq_len = len(set(seq))
-            size = seq_len - length - 1
+            outliers = list(filter(lambda a: a not in itemset, seq))
+            size = len(outliers)
             if size < min_size or size == min_size and len(seq) < min_window_size:
                 min_size = size
                 min_range = (x, y)
@@ -120,10 +120,11 @@ class OutlierFP:
             for (itemset, sequences) in itemsets[ length ].items():
                 resilient_count = 0
                 for seq_id in sequences:
-                    size, min_range = self._find_minimum_window_size(itemset, length, seq_id)
+                    outlier_count, min_range = self._find_minimum_window_size(itemset, length, seq_id)
                     # seq = self.sequences[ seq_id ][ min_range[ 0 ]:min_range[ 1 ] + 1 ]
-                    if size / (length + 1) <= self.epsilon:
+                    if outlier_count / (length + 1) <= self.epsilon:
                         resilient_count += 1
+                    # print('seq_id', seq_id, itemset, seq, outlier_count)
                 if resilient_count > self.minsup:
                     epsilon_resilient_itemsets[ itemset ] = resilient_count
         return epsilon_resilient_itemsets
