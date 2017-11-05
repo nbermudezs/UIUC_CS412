@@ -125,7 +125,7 @@ class OutlierFP:
                     if outlier_count / (length + 1) <= self.epsilon:
                         resilient_count += 1
                     # print('seq_id', seq_id, itemset, seq, outlier_count)
-                if resilient_count > self.minsup:
+                if resilient_count >= self.minsup:
                     epsilon_resilient_itemsets[ itemset ] = resilient_count
         return epsilon_resilient_itemsets
 
