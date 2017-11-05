@@ -136,5 +136,6 @@ class OutlierFP:
     def _create_output(self, itemsets):
         with open(self.output_filepath, 'w') as f:
             for itemset in itemsets:
-                f.write(', '.join(sorted(itemset)))
+                numerical_itemset = sorted([ int(x) for x in list(itemset) ])
+                f.write(', '.join([ str(x) for x in numerical_itemset ]))
                 f.write('\n')
