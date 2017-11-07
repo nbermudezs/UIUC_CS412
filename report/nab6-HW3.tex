@@ -15,7 +15,7 @@
     {Nestor Alejandro Bermudez Sarmiento (nab6)}
     {}
 
-Assignment 3 deals with concepts of  frequent itemsets, outliers and minimum occurrence windows. 
+Assignment 3 deals with concepts of  frequent itemsets, outliers and minimum occurrence windows.
 
 \section*{Question 1}
 For the itemset \textbf{\{D, E, F\}}, report the following statistics.
@@ -35,12 +35,12 @@ The code can be found in the zip file accompanying this report. A few things to 
 
 \begin{enumerate}
 \item I used Python 3.6 but I tested the code with Python 2.7 and it works but for some reason if you use Python 3.6 the itemsets are well ordered by size, which doesn't happen with Python 2.7. So, if possible, try using Python 3.6 for better readability.
-\item The Python script expects the \textbf{data.txt} file to be located at the same level as the main script.
-\item The name of the input file is hard-coded to \textbf{data.txt}.
+\item The Python script expects the \textbf{Data.txt} file to be located at the same level as the main script.
+\item The name of the input file is hard-coded to \textbf{Data.txt}.
 \item The name of the output file is hard-coded to \textbf{nab6-HW3.txt}
 \end{enumerate}
 
-My code implementation makes use of the Apriori algorithm to mine the frequent itemsets with some modifications to handle the outlier based minimum occurrence window. 
+My code implementation makes use of the Apriori algorithm to mine the frequent itemsets with some modifications to handle the outlier based minimum occurrence window.
 
 I first initialize the ranges in which the 1-itemsets appear on each sequence. Note that the ranges have the same start and end positions because they are 1-itemsets. For example, if \textbf{\{A\}} appears in the position 2 and 5 in S1 then its ranges will be \textbf{(2, 2)} and \textbf{(5, 5)}. This redundancy is important to have the same treatment for all itemsets.\\
 
@@ -49,7 +49,7 @@ For example, if \textbf{\{A, B\}} appears in \textbf{(3, 5)} and \textbf{\{B, C\
 
 Later on, the ranges are used to take a portion of the corresponding sequence and find the outliers given an itemset as a reference.\\
 
-\subsubsection*{Results for the sample data.txt file}
+\subsubsection*{Results for the sample Data.txt file}
 1\\
 2\\
 4\\
