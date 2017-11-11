@@ -13,6 +13,7 @@ class Dataset:
     def __init__(self):
         self.examples = []
         self.classes = set()
+        self.attributes = set()
     
     @staticmethod
     def from_file(input_filepath):
@@ -32,6 +33,7 @@ class Dataset:
     def append(self, item):
         self.examples.append(item)
         self.classes.add(item[ 1 ])
+        self.attributes = self.attributes.union(set(item[ 0 ].keys()))
         
     def __len__(self):
         return len(self.examples)
@@ -66,6 +68,13 @@ class Dataset:
             result[ key ] = dataset
         return result
     
+    def attribute_values(self, attribute):
+        result = set()
+        for (features, label) in self.examples:
+            value = features[ attribute ]
+            result.add(value)
+        return result
+    
 if __name__ == '__main__':
     dataset = Dataset.from_file('../../data/balance.scale/balance.scale.train')
     assert type(dataset.classes) == set
@@ -93,4 +102,8 @@ if __name__ == '__main__':
         assert len(split[ key ].examples) > 0
         total += len(split[ key ].examples)
     assert total == len(dataset)
+    
+    values = dataset.attribute_values('1')
+    assert type(values) == set
+    assert len(values) > 0
     
