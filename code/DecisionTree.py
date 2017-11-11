@@ -4,7 +4,7 @@ __copyright__ = 'Copyright (C) 2017 Nestor Bermudez'
 __license__ = 'Public Domain'
 __version__ = '1.0'
 
-from util.LibSVMReader import LibSVMReader
+from util.Dataset import Dataset
 from util.Reporter import Reporter
 
 class DecisionTree:
@@ -31,8 +31,8 @@ if __name__ == '__main__':
     train_filepath = sys.argv[ 1 ]
     test_filepath = sys.argv[ 2 ]
     
-    train_data = LibSVMReader(train_filepath)
-    test_data = LibSVMReader(test_filepath)
+    train_data = Dataset.from_file(train_filepath)
+    test_data = Dataset.from_file(test_filepath)
     
     classifier = DecisionTree()
     classifier.train(train_data)
