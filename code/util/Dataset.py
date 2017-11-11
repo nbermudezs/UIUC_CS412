@@ -4,7 +4,10 @@ __copyright__ = 'Copyright (C) 2017 Nestor Bermudez'
 __license__ = 'Public Domain'
 __version__ = '1.0'
 
-from .LibSVMReader import LibSVMReader
+try:
+    from .LibSVMReader import LibSVMReader
+except:
+    from LibSVMReader import LibSVMReader
 
 class Dataset:
     def __init__(self):
@@ -29,6 +32,9 @@ class Dataset:
     def append(self, item):
         self.examples.append(item)
         self.classes.add(item[ 1 ])
+        
+    def __len__(self):
+        return len(self.examples)
     
     '''
     Returns a dictionary where the keys are the different classes
@@ -86,5 +92,5 @@ if __name__ == '__main__':
         assert len(split[ key ].classes) > 0
         assert len(split[ key ].examples) > 0
         total += len(split[ key ].examples)
-    assert total == len(dataset.examples)
+    assert total == len(dataset)
     
