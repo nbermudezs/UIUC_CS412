@@ -24,8 +24,12 @@ class Dataset:
         return dataset
     
     @staticmethod
-    def from_data(examples, classes):
-        return Dataset(examples, classes)
+    def from_data(examples, classes, attributes):
+        dataset = Dataset()
+        dataset.examples = examples
+        dataset.classes = classes
+        dataset.attributes = attributes
+        return dataset
     
     def items(self):
         return self.examples
@@ -81,25 +85,25 @@ class Dataset:
 if __name__ == '__main__':
     dataset = Dataset.from_file('../../data/balance.scale/balance.scale.train')
     assert type(dataset.classes) == set
-    assert dataset.classes == set([ '1', '2', '3' ])
+    assert dataset.classes == set([ 1, 2, 3 ])
     assert not dataset.is_single_class()
     
     split = dataset.split_by_class()
     assert type(split) == dict
-    assert set(split.keys()) == set([ '1', '2', '3' ])
-    assert type(split[ '1' ]) == Dataset
-    assert split[ '1' ].classes == set([ '1' ])
-    assert split[ '1' ].is_single_class()
+    assert set(split.keys()) == set([ 1, 2, 3 ])
+    assert type(split[ 1 ]) == Dataset
+    assert split[ 1 ].classes == set([ 1 ])
+    assert split[ 1 ].is_single_class()
     
-    assert type(split[ '2' ]) == Dataset
-    assert split[ '2' ].classes == set([ '2' ])
-    assert split[ '2' ].is_single_class()
+    assert type(split[ 2 ]) == Dataset
+    assert split[ 2 ].classes == set([ 2 ])
+    assert split[ 2 ].is_single_class()
     
-    assert type(split[ '3' ]) == Dataset
-    assert split[ '3' ].classes == set([ '3' ])
-    assert split[ '3' ].is_single_class()
+    assert type(split[ 3 ]) == Dataset
+    assert split[ 3 ].classes == set([ 3 ])
+    assert split[ 3 ].is_single_class()
     
-    split = dataset.split_by_attribute('2')
+    split = dataset.split_by_attribute(2)
     assert type(split) == dict
     
     total = 0
@@ -110,7 +114,7 @@ if __name__ == '__main__':
         total += len(split[ key ].examples)
     assert total == len(dataset)
     
-    values = dataset.attribute_values('1')
+    values = dataset.attribute_values(1)
     assert type(values) == set
     assert len(values) > 0
     
