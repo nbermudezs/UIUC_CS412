@@ -15,7 +15,9 @@ class LibSVMReader:
                 split_point = line.find(' ')
                 label = line[ :split_point ]
                 features = line[ split_point + 1: ].split(' ')
-                features = { int(k):v for k, v in map(lambda a: a.split(':'), features) }
+                features = {
+                    int(k):float(v)
+                    for k, v in map(lambda a: a.split(':'), features) }
                 yield (features, int(label))
 
 if __name__ == '__main__':
@@ -25,6 +27,7 @@ if __name__ == '__main__':
         assert type(example[ 0 ]) == dict
         assert type(example[ 1 ]) == int
         
-        for key in example[ 0 ].keys():
+        for key, val in example[ 0 ].items():
             assert type(key) == int
+            assert type(val) == float
     
