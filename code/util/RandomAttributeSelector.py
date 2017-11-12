@@ -14,7 +14,10 @@ class RandomAttributeSelector:
                            up in the tree
     '''
     def __call__(self, dataset, used_attributes):
-        return random.choice(list(dataset.attributes - used_attributes))
+        available = list(dataset.attributes - used_attributes)
+        if len(available) == 0:
+            return None
+        return random.choice(available)
     
 if __name__ == '__main__':
     from Dataset import Dataset
