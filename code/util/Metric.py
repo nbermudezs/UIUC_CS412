@@ -45,7 +45,7 @@ class Metric:
             'f-1 score': Metric._f_beta(TP, FP, FN),
             'f-0.5 score': Metric._f_beta(TP, FP, FN, 0.5),
             'f-2 score': Metric._f_beta(TP, FP, FN, 2),
-            'precision': TP / (TP + FP),
+            'precision': 0.0 if TP == 0 else TP / (TP + FP),
             'recall': TP / P,
             'specificity': TN / (TN + FP)
         }
