@@ -56,3 +56,18 @@ class Metric:
     '''
     def _f_beta(TP, FP, FN, beta = 1.0):
         return (1.0 + beta**2) * TP / ((1.0 + beta**2) * TP + (beta**2) * FP + FN)
+
+if __name__ == '__main__':
+    matrix = {
+        'cat': { 'cat': 5, 'dog': 3, 'rabbit': 0, 'total': 8 },
+        'dog': { 'cat': 2, 'dog': 3, 'rabbit': 1, 'total': 6 },
+        'rabbit': { 'cat': 0, 'dog': 2, 'rabbit': 11, 'total': 13 }
+    }
+    metrics = Metric.class_metrics('cat', matrix)
+    assert metrics[ 'accuracy' ] == 0.8148148148148148
+    assert metrics[ 'f-1 score' ] == 0.6666666666666666
+    assert metrics[ 'f-0.5 score' ] == 0.6410256410256411
+    assert metrics[ 'f-2 score' ] == 0.6944444444444444
+    assert metrics[ 'precision' ] == 0.7142857142857143
+    assert metrics[ 'recall' ] == 0.625
+    assert metrics[ 'specificity' ] == 0.8947368421052632
