@@ -25,15 +25,19 @@ class Reporter:
     def _print_confusion_matrix(matrix, class_order):
         print(color.UNDERLINE + color.BOLD + 'Confusion matrix' + color.END)
         for _class in class_order:
+            matrix_row = matrix.get(_class, {})
+            total = matrix_row.get('total', 0)
             row = []
             for _predicted_class in class_order:
-                row.append('%5s' % str('%.1f' % matrix[ _class ][ _predicted_class ]))
+                count = matrix_row.get(_predicted_class, 0)
+                percent = 0 if total == 0 else count / total
+                row.append('%5s' % str('%.2f' % percent))
             print(' '.join(row))
-        print('Class order: ' + color.BOLD + ', '.join(class_order) + color.END)
+        print('Class order: ' + color.BOLD + ', '.join(map(lambda x: str(x), class_order)) + color.END)
         print('\n')
     
     def _print_overall_accuracy(acc):
-        print('Overall accuracy: ' + color.BOLD + str(acc) + '%' + color.END)
+        print('Overall accuracy: ' + color.BOLD + str(round(acc, 2)) + '%' + color.END)
         print('\n')
     
     def _print_class_metrics(metrics):
@@ -48,9 +52,9 @@ class Reporter:
     
 if __name__ == '__main__':
     confusion_matrix = {
-        'c1': { 'c1': 98,  'c2': 0.5,  'c3': 1.5  },
-        'c2': { 'c1': 0,   'c2': 86.0, 'c3': 4.0  },
-        'c3': { 'c1': 1.1, 'c2': 2.3,  'c3': 96.4 }
+        'c1': { 'c1': 98,  'c2': 1,  'c3': 1,      'total': 100 },
+        'c2': { 'c1': 0,   'c2': 86.0, 'c3': 4.0,  'total': 100 },
+        'c3': { 'c1': 1.1, 'c2': 2.3,  'c3': 96.4, 'total': 100 }
     }
     
     class_metrics = {
