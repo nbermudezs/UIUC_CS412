@@ -30,8 +30,7 @@ class Reporter:
             row = []
             for _predicted_class in class_order:
                 count = matrix_row.get(_predicted_class, 0)
-                percent = 0 if total == 0 else count / total
-                row.append('%5s' % str('%.2f' % percent))
+                row.append('%5s' % str('%4.0f' % count))
             print(' '.join(row))
         print('Class order: ' + color.BOLD + ', '.join(map(lambda x: str(x), class_order)) + color.END)
         print('\n')
@@ -44,9 +43,10 @@ class Reporter:
         classes = metrics.keys()
         for _class in classes:
             class_metrics = metrics[ _class ]
-            print(color.UNDERLINE + color.BOLD + 'Metrics for class ' + _class + color.END)
+            print(color.UNDERLINE + color.BOLD + 'Metrics for class ' + str(_class) + color.END)
             for metric, value in class_metrics.items():
-                print(('%12s' % metric.title()) + ': ' + color.BOLD + str(value) + color.END)
+                print(('%12s' % metric.title()) + ': ' + \
+                      color.BOLD + str(round(value * 100, 2)) + '%' + color.END)
             print('‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
             print('\n')
     
