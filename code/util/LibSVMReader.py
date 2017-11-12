@@ -15,13 +15,16 @@ class LibSVMReader:
                 split_point = line.find(' ')
                 label = line[ :split_point ]
                 features = line[ split_point + 1: ].split(' ')
-                features = { k:v for k, v in map(lambda a: a.split(':'), features) }
-                yield (features, label)
+                features = { int(k):v for k, v in map(lambda a: a.split(':'), features) }
+                yield (features, int(label))
 
 if __name__ == '__main__':
     reader = LibSVMReader('../../data/balance.scale/balance.scale.train')
     for example in reader.read():
         assert type(example) == tuple
         assert type(example[ 0 ]) == dict
-        assert type(example[ 1 ]) == str
+        assert type(example[ 1 ]) == int
+        
+        for key in example[ 0 ].keys():
+            assert type(key) == int
     
