@@ -85,7 +85,7 @@ class DecisionTree:
         return self.tree(example)
     
     def _build_tree(self, data, attribute, used_attributes, depth = 0):
-        if data.is_single_class():
+        if data.is_single_class() or not attribute:
             return DecisionTreeLeaf(min(data.classes))
         if depth == self.max_depth or len(data) <= self.min_dataset_size:
             split = data.split_by_class()
@@ -111,15 +111,66 @@ if __name__ == '__main__':
     if len(sys.argv) < 3:
         print('Usage: python DecisionTree.py <train file> <test file>')
         exit()
+        
+    SHUFFLE_FLAG = '--shuffle'
+    OPTIMAL_FLAG = '--optimal'
+    
+    PARAMS = {
+        'balance.scale':    { 'depth':  3, 'min_dataset_size': 13 },
+        'led':              { 'depth':  5, 'min_dataset_size':  1 },
+        'nursery':          { 'depth': -1, 'min_dataset_size':  1 },
+        'synthetic.social': { 'depth': 13, 'min_dataset_size': 66 }
+    }
     
     train_filepath = sys.argv[ 1 ]
     test_filepath = sys.argv[ 2 ]
     
     train_data = Dataset.from_file(train_filepath)
     test_data = Dataset.from_file(test_filepath)
+    if SHUFFLE_FLAG in sys.argv:
+        from util.RandomSampler import RandomSampler
+        index = sys.argv.index(SHUFFLE_FLAG)
+        percent = float(sys.argv[ index + 1 ])
+        train_data, test_data = RandomSampler.split(train_data, test_data, percent)
+    
+    print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
+    print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
+    print()
+    
+    key = None
+    for dataset_file in PARAMS.keys():
+        if train_filepath.find(dataset_file) >= 0:
+            key = dataset_file
+            break
+    
+    depth = PARAMS[ key ][ 'depth' ]
+    min_size = PARAMS[ key ][ 'min_dataset_size' ]
+    
+    def find_optimal_parameters():
+        best_accuracy = -float('inf')
+        best_depth = 0
+        best_minsize = 0
+        for depth in range(1, len(train_data.attributes) + 1, int(len(train_data.attributes) * 0.2)):
+            for min_size in range(1, int(len(test_data) * 0.1), int(len(test_data) * 0.01)):
+                classifier = DecisionTree(GiniAttributeSelector(), depth, min_size)
+                classifier.train(train_data)
+                accuracy, confusion_matrix = classifier.evaluate(test_data)
+                if accuracy > best_accuracy:
+                    best_accuracy = accuracy
+                    best_depth = depth
+                    best_minsize = min_size
+        return best_depth, best_minsize
+    
+    if OPTIMAL_FLAG in sys.argv:
+        depth, min_size = find_optimal_parameters()
+    
+    print('Using settings for ' + color.BOLD + key + color.END)
+    print('  => Depth=' + color.BOLD + str(depth) + color.END)
+    print('  => Minsize=' + color.BOLD + str(min_size) + color.END)
+    print()
     
     start = time.clock()
-    classifier = DecisionTree(GiniAttributeSelector())
+    classifier = DecisionTree(GiniAttributeSelector(), depth, min_size)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
