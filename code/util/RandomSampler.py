@@ -30,6 +30,14 @@ class RandomSampler:
                 train.append(examples[ index ])
         
         return train, test
+    
+    def sample(data, size = 0.9):
+        total = len(data)
+        indices = random.sample(list(range(0, total)), int(total * size))
+        new_data = Dataset()
+        for index in indices:
+            new_data.append(data.examples[ index ])
+        return new_data
 
 if __name__ == '__main__':
     train = Dataset.from_file('../../data/balance.scale/balance.scale.train')
