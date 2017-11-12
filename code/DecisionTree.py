@@ -4,25 +4,102 @@ __copyright__ = 'Copyright (C) 2017 Nestor Bermudez'
 __license__ = 'Public Domain'
 __version__ = '1.0'
 
-from util.Dataset import Dataset
-from util.Reporter import Reporter
+import random
+
+class DecisionTreeNode:
+    '''
+    branches will be a dictionary where the key is the value of the attribute
+    handled by this node and the value is the next node.
+    '''
+    def __init__(self, attribute):
+        self.attribute = attribute
+        self.branches = {}
+    
+    '''
+    If the value has not been seen before just take a random branch
+    as suggested in the homework.
+    '''
+    def __call__(self, example):
+        value = example[ self.attribute ]
+        if value in self.branches:
+            return self.branches[ value ](example)
+        else:
+            branch_key = random.choice(list(self.branches.keys()))
+            return self.branches[ branch_key ](example)
+    
+    '''
+    Add branch to the tree. Will need this when building the tree.
+    '''
+    def grow(self, value, subtree):
+        self.branches[ value ] = subtree
+        return self
+
+class DecisionTreeLeaf:
+    def __init__(self, label):
+        self.label = label
+    
+    def __call__(self, example):
+        return self.label
+
 
 class DecisionTree:
-    def __init__(self):
-        pass
+    def __init__(self, selector):
+        self.tree = None
+        self.selector = selector
     
+    '''
+    Parameters:
+        - data: instance of Dataset
+    '''
     def train(self, data):
-        pass
+        selected_attribute = self.selector(data, set())
+        self.tree = self._build_tree(data, selected_attribute, { selected_attribute })
     
+    '''
+    Parameters:
+        - data: instance of Dataset
+    '''
     def evaluate(self, data):
-        pass
+        correct = 0
+        total = 0
+        confusion_matrix = {}
+        for (example, label) in data.items():
+            predicted_label = self._predict(example)
+            
+            # stats
+            if predicted_label == label:
+                correct += 1
+            total += 1
+            
+            # update confusion matrix
+            matrix_row = confusion_matrix.get(label, {})
+            matrix_row[ predicted_label ] = matrix_row.get(predicted_label, 0) + 1
+            matrix_row[ 'total' ] = matrix_row.get('total', 0) + 1
+            confusion_matrix[ label ] = matrix_row
+            
+        return (correct / total, confusion_matrix)
     
     def _predict(self, example):
-        pass
+        return self.tree(example)
+    
+    def _build_tree(self, data, attribute, used_attributes):
+        if data.is_single_class():
+            return DecisionTreeLeaf(min(data.classes))
+        subtree = DecisionTreeNode(attribute)
+        split = data.split_by_attribute(attribute)
+        for value, dataset in split.items():
+            best_attribute = self.selector(dataset, used_attributes)
+            branch = self._build_tree(dataset, best_attribute, used_attributes ^ { best_attribute })
+            subtree.grow(value, branch)
+        return subtree
     
 
 if __name__ == '__main__':
     import sys
+    from util.Dataset import Dataset
+    from util.Reporter import Reporter
+    from util.GiniAttributeSelector import GiniAttributeSelector
+    from util.Metric import Metric
     
     if len(sys.argv) < 3:
         print('Usage: python DecisionTree.py <train file> <test file>')
@@ -34,7 +111,8 @@ if __name__ == '__main__':
     train_data = Dataset.from_file(train_filepath)
     test_data = Dataset.from_file(test_filepath)
     
-    classifier = DecisionTree()
+    classifier = DecisionTree(GiniAttributeSelector())
     classifier.train(train_data)
-    metrics = classifier.evaluate(test_data)
+    accuracy, confusion_matrix = classifier.evaluate(test_data)
+    metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
     Reporter.to_stdout(metrics)
