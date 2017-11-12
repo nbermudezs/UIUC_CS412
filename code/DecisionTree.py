@@ -43,9 +43,11 @@ class DecisionTreeLeaf:
 
 
 class DecisionTree:
-    def __init__(self, selector):
+    def __init__(self, selector, max_depth = -1, min_dataset_size = 1):
         self.tree = None
         self.selector = selector
+        self.max_depth = max_depth
+        self.min_dataset_size = min_dataset_size
     
     '''
     Parameters:
@@ -82,22 +84,27 @@ class DecisionTree:
     def _predict(self, example):
         return self.tree(example)
     
-    def _build_tree(self, data, attribute, used_attributes):
+    def _build_tree(self, data, attribute, used_attributes, depth = 0):
         if data.is_single_class():
             return DecisionTreeLeaf(min(data.classes))
+        if depth == self.max_depth or len(data) <= self.min_dataset_size:
+            split = data.split_by_class()
+            best = max(split.items(), key = lambda x: len(x[ 1 ]))[ 0 ]
+            return DecisionTreeLeaf(best)
+            
         subtree = DecisionTreeNode(attribute)
         split = data.split_by_attribute(attribute)
         for value, dataset in split.items():
             best_attribute = self.selector(dataset, used_attributes)
-            branch = self._build_tree(dataset, best_attribute, used_attributes ^ { best_attribute })
+            branch = self._build_tree(dataset, best_attribute, used_attributes ^ { best_attribute }, depth + 1)
             subtree.grow(value, branch)
         return subtree
     
 
 if __name__ == '__main__':
-    import sys
+    import time, sys
     from util.Dataset import Dataset
-    from util.Reporter import Reporter
+    from util.Reporter import Reporter, color
     from util.GiniAttributeSelector import GiniAttributeSelector
     from util.Metric import Metric
     
@@ -111,8 +118,10 @@ if __name__ == '__main__':
     train_data = Dataset.from_file(train_filepath)
     test_data = Dataset.from_file(test_filepath)
     
+    start = time.clock()
     classifier = DecisionTree(GiniAttributeSelector())
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
     Reporter.to_stdout(metrics)
+    print('Finished in: ' + color.BOLD + str(time.clock() - start) + color.END)
