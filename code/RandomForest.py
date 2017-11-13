@@ -137,10 +137,13 @@ if __name__ == '__main__':
     }
     
     OPTIMAL_FLAG = '--optimal'
+    DETAILS_FLAG = '--detailed-output'
     
     if len(sys.argv) < 3:
         print('Usage: python RandomForest.py <train file> <test file>')
         exit()
+    
+    detailedOutput = DETAILS_FLAG in sys.argv
     
     train_filepath = sys.argv[ 1 ]
     test_filepath = sys.argv[ 2 ]
@@ -148,9 +151,10 @@ if __name__ == '__main__':
     train_data = Dataset.from_file(train_filepath)
     test_data = Dataset.from_file(test_filepath)
     
-    print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
-    print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
-    print()
+    if detailedOutput:
+        print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
+        print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
+        print()
     
     dataset_params = None
     for dataset_file in PARAMS.keys():
@@ -185,12 +189,13 @@ if __name__ == '__main__':
     feature_bagging_retention_p = dataset_params[ 'feature_bagging_retention_p' ]
     extremely_randomized = dataset_params[ 'extremely_randomized' ]
         
-    print('Using settings for ' + color.BOLD + dataset_file + color.END)
-    print('  => Forest size=' + color.BOLD + str(size) + color.END)
-    print('  => Data bagging size=' + color.BOLD + str(round(data_bagging_size * 100, 2)) + '%' + color.END)
-    print('  => Feature bagging retention=' + color.BOLD + str(round(feature_bagging_retention_p * 100, 2)) + '%' + color.END)
-    print('  => Extremely randomized?=' + color.BOLD + str(extremely_randomized) + color.END)
-    print()
+    if detailedOutput:
+        print('Using settings for ' + color.BOLD + dataset_file + color.END)
+        print('  => Forest size=' + color.BOLD + str(size) + color.END)
+        print('  => Data bagging size=' + color.BOLD + str(round(data_bagging_size * 100, 2)) + '%' + color.END)
+        print('  => Feature bagging retention=' + color.BOLD + str(round(feature_bagging_retention_p * 100, 2)) + '%' + color.END)
+        print('  => Extremely randomized?=' + color.BOLD + str(extremely_randomized) + color.END)
+        print()
     
     mokuton = RandomForest(size = size,
                            extremely_randomized = extremely_randomized,
@@ -202,6 +207,7 @@ if __name__ == '__main__':
     mokuton.train(train_data)
     accuracy, confusion_matrix = mokuton.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
-    Reporter.to_stdout(metrics, True)
-    print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
+    Reporter.to_stdout(metrics, detailedOutput)
+    if detailedOutput:
+        print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
     
