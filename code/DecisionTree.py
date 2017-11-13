@@ -5,6 +5,11 @@ __license__ = 'Public Domain'
 __version__ = '1.0'
 
 import random
+from multiprocessing import Pool, cpu_count
+
+def get_pool():
+    pool = Pool(processes = cpu_count() - 1)
+    return pool
 
 class DecisionTreeNode:
     '''
@@ -53,11 +58,12 @@ class DecisionTreeLeaf:
 
 
 class DecisionTree:
-    def __init__(self, selector, max_depth = -1, min_dataset_size = 1):
+    def __init__(self, selector, max_depth = -1, min_dataset_size = 1, parallel = False):
         self.tree = None
         self.selector = selector
         self.max_depth = max_depth
         self.min_dataset_size = min_dataset_size
+        self.parallel = parallel
     
     '''
     Parameters:
@@ -66,6 +72,7 @@ class DecisionTree:
     def train(self, data):
         selected_attribute = self.selector(data, set())
         self.tree = self._build_tree(data, selected_attribute, { selected_attribute })
+        return self
     
     '''
     Parameters:
@@ -104,10 +111,30 @@ class DecisionTree:
             
         subtree = DecisionTreeNode(attribute)
         split = data.split_by_attribute(attribute)
+        if self.parallel and depth == 0:
+            branches = []
+            pool = get_pool()
+        
         for value, dataset in split.items():
             best_attribute = self.selector(dataset, used_attributes)
-            branch = self._build_tree(dataset, best_attribute, used_attributes ^ { best_attribute }, depth + 1)
-            subtree.grow(value, branch)
+            if self.parallel and depth == 0:
+                branch = pool.apply_async(self._build_tree, 
+                                          (dataset, best_attribute,
+                                           used_attributes ^ { best_attribute },
+                                           depth + 1))
+                branches.append((value, branch))
+            else:
+                branch = self._build_tree(dataset,
+                                          best_attribute,
+                                          used_attributes ^ { best_attribute },
+                                          depth + 1)
+                subtree.grow(value, branch)
+        
+        if self.parallel and depth == 0:
+            pool.close()
+            pool.join()
+            for (value, branch) in branches:
+                subtree.grow(value, branch.get())
         return subtree
     
     def __str__(self):
@@ -187,12 +214,12 @@ if __name__ == '__main__':
         print('  => Minsize=' + color.BOLD + str(min_size) + color.END)
         print()
     
-    start = time.clock()
-    classifier = DecisionTree(GiniAttributeSelector(), depth, min_size)
+    start = time.time()
+    classifier = DecisionTree(GiniAttributeSelector(), depth, min_size, True)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
     Reporter.to_stdout(metrics, detailedOutput)
     
     if detailedOutput:
-        print('Finished in: ' + color.BOLD + str(time.clock() - start) + color.END)
+        print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
