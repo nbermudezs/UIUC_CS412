@@ -113,6 +113,8 @@ if __name__ == '__main__':
         }
     }
     
+    OPTIMAL_FLAG = '--optimal'
+    
     if len(sys.argv) < 3:
         print('Usage: python RandomForest.py <train file> <test file>')
         exit()
@@ -133,6 +135,28 @@ if __name__ == '__main__':
             dataset_params = PARAMS[ dataset_file ]
             break
     
+    if OPTIMAL_FLAG in sys.argv:
+        def find_optimal_parameters():
+            best_accuracy = -float('inf')
+            best_params = {}
+            for size in range(2, 11):
+                for data_bagging_size in range(1, 9):
+                    data_bagging_size = data_bagging_size / 10.0
+                    for p in range(1, 9):
+                        p = p / 10.0
+                        mokuton = RandomForest(size, data_bagging_size, p, True)
+                        mokuton.jukai_kotan()
+                        mokuton.train(train_data)
+                        accuracy, confusion_matrix = mokuton.evaluate(test_data)
+                        if accuracy > best_accuracy:
+                            best_accuracy = accuracy
+                            best_params[ 'feature_bagging_retention_p' ] = p
+                            best_params[ 'size' ] = size
+                            best_params[ 'extremely_randomized' ] = True
+                            best_params[ 'data_bagging_size' ] = data_bagging_size
+            return best_params
+        dataset_params = find_optimal_parameters()
+        
     size = dataset_params[ 'size' ]
     data_bagging_size = dataset_params[ 'data_bagging_size' ]
     feature_bagging_retention_p = dataset_params[ 'feature_bagging_retention_p' ]
