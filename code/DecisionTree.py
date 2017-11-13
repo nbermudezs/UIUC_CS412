@@ -33,6 +33,13 @@ class DecisionTreeNode:
     def grow(self, value, subtree):
         self.branches[ value ] = subtree
         return self
+    
+    def display(self, depth = 0):
+        result = ''
+        for val, branch in self.branches.items():
+            result += '|' + '-' * depth + str(self.attribute) + ' = ' + str(val) + '\n'
+            result += '|' + '-' * 2 * depth + branch.display(depth + 1) + '\n'
+        return result
 
 class DecisionTreeLeaf:
     def __init__(self, label):
@@ -40,6 +47,9 @@ class DecisionTreeLeaf:
     
     def __call__(self, example):
         return self.label
+    
+    def display(self, depth = 0):
+        return '-' * depth + 'label=' + str(self.label)
 
 
 class DecisionTree:
@@ -99,6 +109,9 @@ class DecisionTree:
             branch = self._build_tree(dataset, best_attribute, used_attributes ^ { best_attribute }, depth + 1)
             subtree.grow(value, branch)
         return subtree
+    
+    def __str__(self):
+        return self.tree.display()
     
 
 if __name__ == '__main__':
