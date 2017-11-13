@@ -50,13 +50,19 @@ class RandomForest:
     def evaluate(self, data):
         correct = 0
         total = 0
+        confusion_matrix = {}
         for (features, label) in data.items():
             predicted_label = self._predict(features)
             if predicted_label == label:
                 correct += 1
             total += 1
             
-        return (correct / total, None)
+            matrix_row = confusion_matrix.get(label, {})
+            matrix_row[ predicted_label ] = matrix_row.get(predicted_label, 0) + 1
+            matrix_row[ 'total' ] = matrix_row.get('total', 0) + 1
+            confusion_matrix[ label ] = matrix_row
+            
+        return (correct / total, confusion_matrix)
     
     def _predict(self, example):
         votes = {}
@@ -78,6 +84,7 @@ if __name__ == '__main__':
     import time, sys
     from util.Dataset import Dataset
     from util.Reporter import Reporter, color
+    from util.Metric import Metric
     
     PARAMS = {
         'synthetic.social': {
@@ -116,22 +123,38 @@ if __name__ == '__main__':
     train_data = Dataset.from_file(train_filepath)
     test_data = Dataset.from_file(test_filepath)
     
+    print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
+    print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
+    print()
+    
     dataset_params = None
     for dataset_file in PARAMS.keys():
         if train_filepath.find(dataset_file) >= 0:
             dataset_params = PARAMS[ dataset_file ]
             break
     
-    mokuton = RandomForest(size = dataset_params[ 'size' ],
-                           extremely_randomized = dataset_params[ 'extremely_randomized' ],
-                           data_bagging_size = dataset_params[ 'data_bagging_size' ],
-                           feature_bagging_retention_p = dataset_params[ 'feature_bagging_retention_p' ])
+    size = dataset_params[ 'size' ]
+    data_bagging_size = dataset_params[ 'data_bagging_size' ]
+    feature_bagging_retention_p = dataset_params[ 'feature_bagging_retention_p' ]
+    extremely_randomized = dataset_params[ 'extremely_randomized' ]
+        
+    print('Using settings for ' + color.BOLD + dataset_file + color.END)
+    print('  => Forest size=' + color.BOLD + str(size) + color.END)
+    print('  => Data bagging size=' + color.BOLD + str(round(data_bagging_size * 100, 2)) + '%' + color.END)
+    print('  => Feature bagging retention=' + color.BOLD + str(round(feature_bagging_retention_p * 100, 2)) + '%' + color.END)
+    print('  => Extremely randomized?=' + color.BOLD + str(extremely_randomized) + color.END)
+    print()
+    
+    mokuton = RandomForest(size = size,
+                           extremely_randomized = extremely_randomized,
+                           data_bagging_size = data_bagging_size,
+                           feature_bagging_retention_p = feature_bagging_retention_p)
     mokuton.jukai_kotan()
     
     start = time.clock()
     mokuton.train(train_data)
     accuracy, confusion_matrix = mokuton.evaluate(test_data)
-    print('Accuracy', accuracy)
-    
+    metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
+    Reporter.to_stdout(metrics)
     print('Finished in: ' + color.BOLD + str(time.clock() - start) + color.END)
     
