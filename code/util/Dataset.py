@@ -14,6 +14,7 @@ class Dataset:
         self.examples = []
         self.classes = set()
         self.attributes = set()
+        self.available_attributes = set()
     
     @staticmethod
     def from_file(input_filepath):
@@ -38,6 +39,7 @@ class Dataset:
         self.examples.append(item)
         self.classes.add(item[ 1 ])
         self.attributes = self.attributes.union(set(item[ 0 ].keys()))
+        self.available_attributes = self.available_attributes.union(set(item[ 0 ].keys()))
         
     def __len__(self):
         return len(self.examples)
@@ -69,6 +71,7 @@ class Dataset:
             key = features[ attribute ]
             dataset = result.get(key, Dataset())
             dataset.append((features, label))
+            dataset.available_attributes = self.available_attributes
             result[ key ] = dataset
         return result
     

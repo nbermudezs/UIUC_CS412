@@ -19,7 +19,7 @@ class GiniAttributeSelector:
     def __call__(self, dataset, used_attributes):
         best_attribute = None
         best_reduction = -float('inf')
-        attributes = dataset.attributes
+        attributes = dataset.available_attributes
         for attribute in (attributes - used_attributes):
             reduction = GiniIndex(dataset).impurity_reduction(attribute)
             if reduction > best_reduction:
