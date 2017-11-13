@@ -8,8 +8,16 @@ from util.GiniAttributeSelector import GiniAttributeSelector
 from util.RandomAttributeSelector import RandomAttributeSelector
 from util.RandomSampler import RandomSampler
 from DecisionTree import DecisionTree
+from multiprocessing import Pool, cpu_count
 
 import random
+
+def grow_tree(sel, size):
+    return DecisionTree(sel, min_dataset_size = size)
+
+def get_pool():
+    pool = Pool(processes = cpu_count() - 1)
+    return pool
 
 class RandomForest:
     def __init__(self, size = 5, data_bagging_size = 0.9,
@@ -35,17 +43,28 @@ class RandomForest:
             selector = RandomAttributeSelector()
         else:
             selector = GiniAttributeSelector()
-        self.trees = [ DecisionTree(selector, min_dataset_size = 10)
-                       for i in range(self.size) ]
+        
+        pool = get_pool()
+        results = []
+        for i in range(self.size):
+            result = pool.apply_async(grow_tree, (selector, 10))
+            results.append(result)
+        pool.close()
+        pool.join()
+        self.trees = [ result.get() for result in results ]
     
     '''
     Uses data bagging by taking a random sample of the data 
     for every decision tree
     '''
     def train(self, data):
+        pool = get_pool()
+        results = []
         for tree in self.trees:
-            tree_data = self._tree_data(data)
-            tree.train(tree_data)
+            results.append(pool.apply_async(self._train_tree, (tree, data)))
+        pool.close()
+        pool.join()
+        self.trees = [ result.get() for result in results ]
     
     def evaluate(self, data):
         correct = 0
@@ -70,6 +89,10 @@ class RandomForest:
             label = tree._predict(example)
             votes[ label ] = votes.get(label, 0) + 1
         return max(votes.items(), key = lambda x: x[ 1 ])[ 0 ]
+
+    def _train_tree(self, tree, data):
+        tree_data = self._tree_data(data)
+        return tree.train(tree_data)
     
     def _tree_data(self, source):
         data = RandomSampler.sample(source, self.data_bagging_size)
@@ -88,22 +111,22 @@ if __name__ == '__main__':
     
     PARAMS = {
         'synthetic.social': {
-            'size': 7,
+            'size': 13,
             'extremely_randomized': False,
             'data_bagging_size': 0.9,
-            'feature_bagging_retention_p': 0.2
+            'feature_bagging_retention_p': 0.4
         }, # DONE
         'balance.scale': {
-            'size': 7,
+            'size': 301,
             'extremely_randomized': False,
-            'data_bagging_size': 0.9,
-            'feature_bagging_retention_p': 0.2
+            'data_bagging_size': 0.7,
+            'feature_bagging_retention_p': 0.8
         },
         'nursery': {
             'size': 7,
             'extremely_randomized': False,
             'data_bagging_size': 0.9,
-            'feature_bagging_retention_p': 0.2
+            'feature_bagging_retention_p': 1
         },
         'led': {
             'size': 7,
@@ -175,10 +198,10 @@ if __name__ == '__main__':
                            feature_bagging_retention_p = feature_bagging_retention_p)
     mokuton.jukai_kotan()
     
-    start = time.clock()
+    start = time.time()
     mokuton.train(train_data)
     accuracy, confusion_matrix = mokuton.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
-    Reporter.to_stdout(metrics)
-    print('Finished in: ' + color.BOLD + str(time.clock() - start) + color.END)
+    Reporter.to_stdout(metrics, True)
+    print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
     
