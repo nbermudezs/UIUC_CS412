@@ -17,13 +17,15 @@ class color:
    END = '\033[0m'
 
 class Reporter:
-    def to_stdout(metrics):
-        Reporter._print_confusion_matrix(metrics[ 'confusion_matrix' ], metrics[ 'class_order' ])
-        Reporter._print_overall_accuracy(metrics[ 'overall_accuracy' ])
-        Reporter._print_class_metrics(metrics[ 'class_metrics' ])
+    def to_stdout(metrics, detailedOutput = False):
+        Reporter._print_confusion_matrix(metrics[ 'confusion_matrix' ], metrics[ 'class_order' ], detailedOutput)
+        if detailedOutput:
+            Reporter._print_overall_accuracy(metrics[ 'overall_accuracy' ])
+            Reporter._print_class_metrics(metrics[ 'class_metrics' ])
     
-    def _print_confusion_matrix(matrix, class_order):
-        print(color.UNDERLINE + color.BOLD + 'Confusion matrix' + color.END)
+    def _print_confusion_matrix(matrix, class_order, detailedOutput):
+        if detailedOutput:
+            print(color.UNDERLINE + color.BOLD + 'Confusion matrix' + color.END)
         for _class in class_order:
             matrix_row = matrix.get(_class, {})
             total = matrix_row.get('total', 0)
@@ -32,8 +34,9 @@ class Reporter:
                 count = matrix_row.get(_predicted_class, 0)
                 row.append('%5s' % str('%4.0f' % count))
             print(' '.join(row))
-        print('Class order: ' + color.BOLD + ', '.join(map(lambda x: str(x), class_order)) + color.END)
-        print('\n')
+        if detailedOutput:
+            print('Class order: ' + color.BOLD + ', '.join(map(lambda x: str(x), class_order)) + color.END)
+            print('\n')
     
     def _print_overall_accuracy(acc):
         print('Overall accuracy: ' + color.BOLD + str(round(acc, 2)) + '%' + color.END)

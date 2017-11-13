@@ -127,6 +127,7 @@ if __name__ == '__main__':
         
     SHUFFLE_FLAG = '--shuffle'
     OPTIMAL_FLAG = '--optimal'
+    DETAILS_FLAG = '--detailed-output'
     
     PARAMS = {
         'balance.scale':    { 'depth':  3, 'min_dataset_size': 13 },
@@ -134,6 +135,8 @@ if __name__ == '__main__':
         'nursery':          { 'depth': -1, 'min_dataset_size':  1 },
         'synthetic.social': { 'depth': 13, 'min_dataset_size': 66 }
     }
+    
+    detailedOutput = DETAILS_FLAG in sys.argv
     
     train_filepath = sys.argv[ 1 ]
     test_filepath = sys.argv[ 2 ]
@@ -146,9 +149,10 @@ if __name__ == '__main__':
         percent = float(sys.argv[ index + 1 ])
         train_data, test_data = RandomSampler.split(train_data, test_data, percent)
     
-    print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
-    print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
-    print()
+    if detailedOutput:
+        print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
+        print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
+        print()
     
     key = None
     for dataset_file in PARAMS.keys():
@@ -177,15 +181,18 @@ if __name__ == '__main__':
     if OPTIMAL_FLAG in sys.argv:
         depth, min_size = find_optimal_parameters()
     
-    print('Using settings for ' + color.BOLD + key + color.END)
-    print('  => Depth=' + color.BOLD + str(depth) + color.END)
-    print('  => Minsize=' + color.BOLD + str(min_size) + color.END)
-    print()
+    if detailedOutput:
+        print('Using settings for ' + color.BOLD + key + color.END)
+        print('  => Depth=' + color.BOLD + str(depth) + color.END)
+        print('  => Minsize=' + color.BOLD + str(min_size) + color.END)
+        print()
     
     start = time.clock()
     classifier = DecisionTree(GiniAttributeSelector(), depth, min_size)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
-    Reporter.to_stdout(metrics)
-    print('Finished in: ' + color.BOLD + str(time.clock() - start) + color.END)
+    Reporter.to_stdout(metrics, detailedOutput)
+    
+    if detailedOutput:
+        print('Finished in: ' + color.BOLD + str(time.clock() - start) + color.END)
