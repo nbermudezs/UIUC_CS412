@@ -32,7 +32,10 @@ class Reporter:
             row = []
             for _predicted_class in class_order:
                 count = matrix_row.get(_predicted_class, 0)
-                row.append('%5s' % str('%4.0f' % count))
+                if detailedOutput:
+                    row.append('%5s' % str('%4.0f' % count))
+                else:
+                    row.append(str(count))
             print(' '.join(row))
         if detailedOutput:
             print('Class order: ' + color.BOLD + ', '.join(map(lambda x: str(x), class_order)) + color.END)
