@@ -33,10 +33,9 @@ class RandomSampler:
     
     def sample(data, size = 0.9):
         total = len(data)
-        indices = random.sample(list(range(0, total)), int(total * size))
         new_data = Dataset()
-        for index in indices:
-            new_data.append(data.examples[ index ])
+        for _ in range(int(total * size)):
+            new_data.append(random.choice(data.examples))
         return new_data
 
 if __name__ == '__main__':
