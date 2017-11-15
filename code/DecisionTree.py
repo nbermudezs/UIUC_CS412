@@ -6,9 +6,10 @@ __version__ = '1.0'
 
 import random
 from multiprocessing import Pool, cpu_count
+from util.NonDemonicProcessPool import NonDemonicPool
 
 def get_pool():
-    pool = Pool(processes = cpu_count() - 1)
+    pool = NonDemonicPool(processes = cpu_count() - 1)
     return pool
 
 class DecisionTreeNode:
@@ -19,7 +20,7 @@ class DecisionTreeNode:
     def __init__(self, attribute):
         self.attribute = attribute
         self.branches = {}
-    
+
     '''
     If the value has not been seen before just take a random branch
     as suggested in the homework.
@@ -31,14 +32,14 @@ class DecisionTreeNode:
         else:
             branch_key = random.choice(list(self.branches.keys()))
             return self.branches[ branch_key ](example)
-    
+
     '''
     Add branch to the tree. Will need this when building the tree.
     '''
     def grow(self, value, subtree):
         self.branches[ value ] = subtree
         return self
-    
+
     def display(self, depth = 0):
         result = ''
         for val, branch in self.branches.items():
@@ -49,10 +50,10 @@ class DecisionTreeNode:
 class DecisionTreeLeaf:
     def __init__(self, label):
         self.label = label
-    
+
     def __call__(self, example):
         return self.label
-    
+
     def display(self, depth = 0):
         return '-' * depth + 'label=' + str(self.label)
 
@@ -64,7 +65,7 @@ class DecisionTree:
         self.max_depth = max_depth
         self.min_dataset_size = min_dataset_size
         self.parallel = parallel
-    
+
     '''
     Parameters:
         - data: instance of Dataset
@@ -73,7 +74,7 @@ class DecisionTree:
         selected_attribute = self.selector(data, set())
         self.tree = self._build_tree(data, selected_attribute, { selected_attribute })
         return self
-    
+
     '''
     Parameters:
         - data: instance of Dataset
@@ -84,23 +85,23 @@ class DecisionTree:
         confusion_matrix = {}
         for (example, label) in data.items():
             predicted_label = self._predict(example)
-            
+
             # stats
             if predicted_label == label:
                 correct += 1
             total += 1
-            
+
             # update confusion matrix
             matrix_row = confusion_matrix.get(label, {})
             matrix_row[ predicted_label ] = matrix_row.get(predicted_label, 0) + 1
             matrix_row[ 'total' ] = matrix_row.get('total', 0) + 1
             confusion_matrix[ label ] = matrix_row
-            
+
         return (correct / total, confusion_matrix)
-    
+
     def _predict(self, example):
         return self.tree(example)
-    
+
     def _build_tree(self, data, attribute, used_attributes, depth = 0):
         if data.is_single_class() or not attribute:
             return DecisionTreeLeaf(min(data.classes))
@@ -108,17 +109,17 @@ class DecisionTree:
             split = data.split_by_class()
             best = max(split.items(), key = lambda x: len(x[ 1 ]))[ 0 ]
             return DecisionTreeLeaf(best)
-            
+
         subtree = DecisionTreeNode(attribute)
         split = data.split_by_attribute(attribute)
-        if self.parallel and depth == 0:
+        if self.parallel:
             branches = []
             pool = get_pool()
-        
+
         for value, dataset in split.items():
             best_attribute = self.selector(dataset, used_attributes)
-            if self.parallel and depth == 0:
-                branch = pool.apply_async(self._build_tree, 
+            if self.parallel:
+                branch = pool.apply_async(self._build_tree,
                                           (dataset, best_attribute,
                                            used_attributes ^ { best_attribute },
                                            depth + 1))
@@ -129,17 +130,17 @@ class DecisionTree:
                                           used_attributes ^ { best_attribute },
                                           depth + 1)
                 subtree.grow(value, branch)
-        
-        if self.parallel and depth == 0:
+
+        if self.parallel:
             pool.close()
             pool.join()
             for (value, branch) in branches:
                 subtree.grow(value, branch.get())
         return subtree
-    
+
     def __str__(self):
         return self.tree.display()
-    
+
 
 if __name__ == '__main__':
     import time, sys
@@ -147,27 +148,27 @@ if __name__ == '__main__':
     from util.Reporter import Reporter, color
     from util.GiniAttributeSelector import GiniAttributeSelector
     from util.Metric import Metric
-    
+
     if len(sys.argv) < 3:
         print('Usage: python DecisionTree.py <train file> <test file>')
         exit()
-        
+
     SHUFFLE_FLAG = '--shuffle'
     OPTIMAL_FLAG = '--optimal'
     DETAILS_FLAG = '--detailed-output'
-    
+
     PARAMS = {
         'balance.scale':    { 'depth':  3, 'min_dataset_size': 13 },
         'led':              { 'depth':  5, 'min_dataset_size':  1 },
         'nursery':          { 'depth': -1, 'min_dataset_size':  1 },
         'synthetic.social': { 'depth': 13, 'min_dataset_size': 66 }
     }
-    
+
     detailedOutput = DETAILS_FLAG in sys.argv
-    
+
     train_filepath = sys.argv[ 1 ]
     test_filepath = sys.argv[ 2 ]
-    
+
     train_data = Dataset.from_file(train_filepath)
     test_data = Dataset.from_file(test_filepath)
     if SHUFFLE_FLAG in sys.argv:
@@ -175,21 +176,21 @@ if __name__ == '__main__':
         index = sys.argv.index(SHUFFLE_FLAG)
         percent = float(sys.argv[ index + 1 ])
         train_data, test_data = RandomSampler.split(train_data, test_data, percent)
-    
+
     if detailedOutput:
         print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
         print('Test set size: ' + color.BOLD + str(len(test_data)) + color.END)
         print()
-    
+
     key = None
     for dataset_file in PARAMS.keys():
         if train_filepath.find(dataset_file) >= 0:
             key = dataset_file
             break
-    
+
     depth = PARAMS[ key ][ 'depth' ]
     min_size = PARAMS[ key ][ 'min_dataset_size' ]
-    
+
     def find_optimal_parameters():
         best_accuracy = -float('inf')
         best_depth = 0
@@ -204,22 +205,22 @@ if __name__ == '__main__':
                     best_depth = depth
                     best_minsize = min_size
         return best_depth, best_minsize
-    
+
     if OPTIMAL_FLAG in sys.argv:
         depth, min_size = find_optimal_parameters()
-    
+
     if detailedOutput:
         print('Using settings for ' + color.BOLD + key + color.END)
         print('  => Depth=' + color.BOLD + str(depth) + color.END)
         print('  => Minsize=' + color.BOLD + str(min_size) + color.END)
         print()
-    
+
     start = time.time()
     classifier = DecisionTree(GiniAttributeSelector(), depth, min_size, True)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
     Reporter.to_stdout(metrics, detailedOutput)
-    
+
     if detailedOutput:
         print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
