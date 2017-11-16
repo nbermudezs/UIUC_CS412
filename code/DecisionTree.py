@@ -59,12 +59,14 @@ class DecisionTreeLeaf:
 
 
 class DecisionTree:
-    def __init__(self, selector, max_depth = -1, min_dataset_size = 1, parallel = False):
+    def __init__(self, selector, max_depth = -1,
+                 min_dataset_size = 1, parallel = False, min_leaf_size = -1):
         self.tree = None
         self.selector = selector
         self.max_depth = max_depth
         self.min_dataset_size = min_dataset_size
         self.parallel = parallel
+        self.min_leaf_size = min_leaf_size
 
     '''
     Parameters:
@@ -103,11 +105,10 @@ class DecisionTree:
         return self.tree(example)
 
     def _build_tree(self, data, attribute, used_attributes, depth = 0):
-        if data.is_single_class() or not attribute:
+        if data.is_single_class():
             return DecisionTreeLeaf(min(data.classes))
-        if depth == self.max_depth or len(data) <= self.min_dataset_size:
-            split = data.split_by_class()
-            best = max(split.items(), key = lambda x: len(x[ 1 ]))[ 0 ]
+        if depth == self.max_depth or len(data) <= self.min_dataset_size or not attribute:
+            best = max(data.class_counts.items(), key = lambda x: x[ 1 ])[ 0 ]
             return DecisionTreeLeaf(best)
 
         subtree = DecisionTreeNode(attribute)
@@ -116,7 +117,13 @@ class DecisionTree:
             branches = []
             pool = get_pool()
 
+        if self.min_leaf_size > 0:
+            max_value = max(split.items(), key = lambda x: len(x[ 1 ]))[ 0 ]
         for value, dataset in split.items():
+            if (len(dataset)) <= self.min_leaf_size and value != max_value:
+                best = max(data.class_counts.items(), key = lambda x: x[ 1 ])[ 0 ]
+                subtree.grow(value, DecisionTreeLeaf(best))
+                continue
             best_attribute = self.selector(dataset, used_attributes)
             if self.parallel:
                 branch = pool.apply_async(self._build_tree,
@@ -158,10 +165,10 @@ if __name__ == '__main__':
     DETAILS_FLAG = '--detailed-output'
 
     PARAMS = {
-        'balance.scale':    { 'depth':  3, 'min_dataset_size': 13 },
-        'led':              { 'depth':  5, 'min_dataset_size':  1 },
-        'nursery':          { 'depth': -1, 'min_dataset_size':  1 },
-        'synthetic.social': { 'depth': 13, 'min_dataset_size': 66 }
+        'balance.scale':    { 'depth':  3, 'min_dataset_size':  6, 'min_leaf_size':  1, 'parallel': False },
+        'led':              { 'depth':  5, 'min_dataset_size':  1, 'min_leaf_size':  1, 'parallel': False }, # DONE
+        'nursery':          { 'depth': -1, 'min_dataset_size':  1, 'min_leaf_size': -1, 'parallel': False }, # DONE
+        'synthetic.social': { 'depth': 13, 'min_dataset_size': 66, 'min_leaf_size':  1, 'parallel':  True }  # DONE
     }
 
     detailedOutput = DETAILS_FLAG in sys.argv
@@ -173,9 +180,7 @@ if __name__ == '__main__':
     test_data = Dataset.from_file(test_filepath)
     if SHUFFLE_FLAG in sys.argv:
         from util.RandomSampler import RandomSampler
-        index = sys.argv.index(SHUFFLE_FLAG)
-        percent = float(sys.argv[ index + 1 ])
-        train_data, test_data = RandomSampler.split(train_data, test_data, percent)
+        train_data = RandomSampler.sample(train_data)
 
     if detailedOutput:
         print('Training set size: ' + color.BOLD + str(len(train_data)) + color.END)
@@ -190,6 +195,8 @@ if __name__ == '__main__':
 
     depth = PARAMS[ key ][ 'depth' ]
     min_size = PARAMS[ key ][ 'min_dataset_size' ]
+    parallel = PARAMS[ key ][ 'parallel' ]
+    leaf_size = PARAMS[ key ][ 'min_leaf_size' ]
 
     def find_optimal_parameters():
         best_accuracy = -float('inf')
@@ -216,11 +223,14 @@ if __name__ == '__main__':
         print()
 
     start = time.time()
-    classifier = DecisionTree(GiniAttributeSelector(), depth, min_size, True)
+    classifier = DecisionTree(GiniAttributeSelector(), depth, min_size, parallel, leaf_size)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
     metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
     Reporter.to_stdout(metrics, detailedOutput)
 
     if detailedOutput:
+        accuracy, confusion_matrix = classifier.evaluate(train_data)
+        metrics = Metric.process(accuracy, confusion_matrix, train_data.classes)
+        Reporter.to_stdout(metrics, detailedOutput)
         print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
