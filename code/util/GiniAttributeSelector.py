@@ -21,7 +21,7 @@ class GiniAttributeSelector:
         best_reduction = -float('inf')
         attributes = dataset.available_attributes
         for attribute in (attributes - used_attributes):
-            reduction = GiniIndex(dataset).impurity_reduction(attribute)
+            reduction = GiniIndex.impurity_reduction(dataset, attribute)
             if reduction > best_reduction:
                 best_reduction = reduction
                 best_attribute = attribute
@@ -29,18 +29,18 @@ class GiniAttributeSelector:
 
 if __name__ == '__main__':
     from Dataset import Dataset
-    
+
     dataset = Dataset.from_file('../../data/balance.scale/balance.scale.train')
     selector = GiniAttributeSelector()
     best_attribute = selector(dataset, set())
     assert best_attribute == 2
-    
+
     best_attribute = selector(dataset, { 2 })
     assert best_attribute == 3
-    
+
     best_attribute = selector(dataset, { 2, 3 })
     assert best_attribute == 4
-    
+
     split = dataset.split_by_attribute(2)
     best_attribute = selector(split[ 5 ], { 2 })
     assert best_attribute == 1

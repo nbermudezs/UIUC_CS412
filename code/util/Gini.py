@@ -7,32 +7,25 @@ __version__ = '1.0'
 import functools
 
 class GiniIndex:
-    def __init__(self, D):
-        self.D = D
-        self._index = None
-
-    def index(self):
-        if not self._index:
-            self._index = GiniIndex.calculate(self.D)
-        return self._index
-
     @staticmethod
     def calculate(D):
         return 1 - sum([
             (n_D_j / D.n_samples)**2
             for _, n_D_j in D.class_counts.items()])
 
+    @staticmethod
     @functools.lru_cache(maxsize = 1024)
-    def split(self, attribute):
+    def split(D, attribute):
         # True means it should not fill in the examples. We don't need them
-        split = self.D.split_counts_by_attribute(attribute)
+        split = D.split_counts_by_attribute(attribute)
         return sum([
-            len(D_j) / self.D.n_samples * GiniIndex.calculate(D_j)
+            len(D_j) / D.n_samples * GiniIndex.calculate(D_j)
             for _, D_j in split.items() ])
 
+    @staticmethod
     @functools.lru_cache(maxsize = 1024)
-    def impurity_reduction(self, attribute):
-        return self.index() - self.split(attribute)
+    def impurity_reduction(D, attribute):
+        return GiniIndex.calculate(D) - GiniIndex.split(D, attribute)
 
 
 if __name__ == '__main__':
@@ -40,10 +33,9 @@ if __name__ == '__main__':
     from Reporter import color
 
     dataset = Dataset.from_file('../../data/balance.scale/balance.scale.train')
-    gini = GiniIndex(dataset)
-    print('gini index: ', gini.index())
+    print('gini index: ', GiniIndex.calculate(dataset))
 
     for attribute in dataset.available_attributes:
-        reduction = gini.impurity_reduction(attribute)
+        reduction = GiniIndex.impurity_reduction(dataset, attribute)
         print('Impurity reduction for attribute ' + color.BOLD + \
-              attribute + color.END + ': ' +color.BOLD + str(reduction) + color.END)
+              str(attribute) + color.END + ': ' +color.BOLD + str(reduction) + color.END)
