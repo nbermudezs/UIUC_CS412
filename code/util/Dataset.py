@@ -15,6 +15,7 @@ class Dataset:
         self.classes = set()
         self.available_attributes = set()
         self.class_counts = {}
+        self.n_samples = 0
 
     @staticmethod
     def from_file(input_filepath):
@@ -35,14 +36,16 @@ class Dataset:
     def items(self):
         return self.examples
 
-    def append(self, item):
-        self.examples.append(item)
-        self.classes.add(item[ 1 ])
-        self.available_attributes.update(item[ 0 ].keys())
+    def append(self, item, counts_only = False):
+        if not counts_only:
+            self.examples.append(item)
+            self.classes.add(item[ 1 ])
+            self.available_attributes.update(item[ 0 ].keys())
         self.class_counts[ item[ 1 ] ] = self.class_counts.get(item[ 1 ], 0) + 1
+        self.n_samples += 1
 
     def __len__(self):
-        return len(self.examples)
+        return self.n_samples
 
     '''
     Returns a dictionary where the keys are the different classes
@@ -65,12 +68,12 @@ class Dataset:
     Dataset.classes will have the different classes found in such dataset
     which may be a subset of the original list of classes.
     '''
-    def split_by_attribute(self, attribute):
+    def split_by_attribute(self, attribute, counts_only = False):
         result = {}
         for (features, label) in self.examples:
             key = features[ attribute ]
             dataset = result.get(key, Dataset())
-            dataset.append((features, label))
+            dataset.append((features, label), counts_only)
             dataset.available_attributes = self.available_attributes
             result[ key ] = dataset
         return result
