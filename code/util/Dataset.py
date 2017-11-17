@@ -4,6 +4,8 @@ __copyright__ = 'Copyright (C) 2017 Nestor Bermudez'
 __license__ = 'Public Domain'
 __version__ = '1.0'
 
+from collections import defaultdict
+
 try:
     from .LibSVMReader import LibSVMReader
 except:
@@ -33,10 +35,12 @@ class Dataset:
         self.available_attributes.update(item[ 0 ].keys())
         self.class_counts[ item[ 1 ] ] = self.class_counts.get(item[ 1 ], 0) + 1
         self.n_samples += 1
+        return self
 
     def count_label(self, label):
         self.class_counts[ label ] = self.class_counts.get(label, 0) + 1
         self.n_samples += 1
+        return self
 
     def __len__(self):
         return self.n_samples
@@ -61,23 +65,22 @@ class Dataset:
     Dataset objects containing the objects that match that criteria.
     '''
     def split_by_attribute(self, attribute):
-        result = {}
+        result = defaultdict(lambda: Dataset().set_attrs(self.available_attributes))
         for (features, label) in self.examples:
             key = features[ attribute ]
-            dataset = result.get(key, Dataset())
-            dataset.append((features, label))
-            dataset.available_attributes = self.available_attributes
-            result[ key ] = dataset
+            result[ key ] = result[ key ].append((features, label))
         return result
 
     def split_counts_by_attribute(self, attribute):
-        result = {}
+        result = defaultdict(lambda: Dataset(counts_only = True))
         for features, label in self.examples:
             key = features[ attribute ]
-            dataset = result.get(key, Dataset(counts_only = True))
-            dataset.count_label(label)
-            result[ key ] = dataset
+            result[ key ] = result[ key ].count_label(label)
         return result
+
+    def set_attrs(self, attributes):
+        self.available_attributes = attributes
+        return self
 
     '''
     For debugging only
