@@ -28,11 +28,14 @@ class Dataset:
     def items(self):
         return self.examples
 
-    def append(self, item, counts_only = False):
-        if not counts_only:
-            self.examples.append(item)
-            self.available_attributes.update(item[ 0 ].keys())
+    def append(self, item):
+        self.examples.append(item)
+        self.available_attributes.update(item[ 0 ].keys())
         self.class_counts[ item[ 1 ] ] = self.class_counts.get(item[ 1 ], 0) + 1
+        self.n_samples += 1
+
+    def count_label(self, label):
+        self.class_counts[ label ] = self.class_counts.get(label, 0) + 1
         self.n_samples += 1
 
     def __len__(self):
@@ -57,13 +60,22 @@ class Dataset:
     of the provided attribute and the values of the dictionary are
     Dataset objects containing the objects that match that criteria.
     '''
-    def split_by_attribute(self, attribute, counts_only = False):
+    def split_by_attribute(self, attribute):
         result = {}
         for (features, label) in self.examples:
             key = features[ attribute ]
-            dataset = result.get(key, Dataset(counts_only))
-            dataset.append((features, label), counts_only)
+            dataset = result.get(key, Dataset())
+            dataset.append((features, label))
             dataset.available_attributes = self.available_attributes
+            result[ key ] = dataset
+        return result
+
+    def split_counts_by_attribute(self, attribute):
+        result = {}
+        for features, label in self.examples:
+            key = features[ attribute ]
+            dataset = result.get(key, Dataset(counts_only = True))
+            dataset.count_label(label)
             result[ key ] = dataset
         return result
 

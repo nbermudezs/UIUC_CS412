@@ -25,7 +25,7 @@ class GiniIndex:
     @functools.lru_cache(maxsize = 1024)
     def split(self, attribute):
         # True means it should not fill in the examples. We don't need them
-        split = self.D.split_by_attribute(attribute, True)
+        split = self.D.split_counts_by_attribute(attribute)
         return sum([
             len(D_j) / self.D.n_samples * GiniIndex.calculate(D_j)
             for _, D_j in split.items() ])
