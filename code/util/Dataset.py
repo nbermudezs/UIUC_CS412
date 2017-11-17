@@ -13,7 +13,6 @@ class Dataset:
     def __init__(self, counts_only = False):
         if not counts_only:
             self.examples = []
-            self.classes = set()
             self.available_attributes = set()
         self.class_counts = {}
         self.n_samples = 0
@@ -32,7 +31,6 @@ class Dataset:
     def append(self, item, counts_only = False):
         if not counts_only:
             self.examples.append(item)
-            self.classes.add(item[ 1 ])
             self.available_attributes.update(item[ 0 ].keys())
         self.class_counts[ item[ 1 ] ] = self.class_counts.get(item[ 1 ], 0) + 1
         self.n_samples += 1
@@ -44,7 +42,6 @@ class Dataset:
     Returns a dictionary where the keys are the different classes
     and the values are Dataset objects containing the examples for
     that class only.
-    Dataset.classes will only have one element
     DO NOT USE ANYMORE
     '''
     def _split_by_class(self):
@@ -59,8 +56,6 @@ class Dataset:
     Returns a dictionary where the keys are the different values
     of the provided attribute and the values of the dictionary are
     Dataset objects containing the objects that match that criteria.
-    Dataset.classes will have the different classes found in such dataset
-    which may be a subset of the original list of classes.
     '''
     def split_by_attribute(self, attribute, counts_only = False):
         result = {}
@@ -83,27 +78,22 @@ class Dataset:
         return result
 
     def is_single_class(self):
-        return len(self.classes) == 1
+        return len(self.class_counts.keys()) == 1
 
 if __name__ == '__main__':
     dataset = Dataset.from_file('../../data/balance.scale/balance.scale.train')
-    assert type(dataset.classes) == set
-    assert dataset.classes == set([ 1, 2, 3 ])
     assert not dataset.is_single_class()
 
     split = dataset._split_by_class()
     assert type(split) == dict
     assert set(split.keys()) == set([ 1, 2, 3 ])
     assert type(split[ 1 ]) == Dataset
-    assert split[ 1 ].classes == set([ 1 ])
     assert split[ 1 ].is_single_class()
 
     assert type(split[ 2 ]) == Dataset
-    assert split[ 2 ].classes == set([ 2 ])
     assert split[ 2 ].is_single_class()
 
     assert type(split[ 3 ]) == Dataset
-    assert split[ 3 ].classes == set([ 3 ])
     assert split[ 3 ].is_single_class()
 
     split = dataset.split_by_attribute(2)
@@ -112,7 +102,7 @@ if __name__ == '__main__':
     total = 0
     for key in split.keys():
         assert type(split[ key ]) == Dataset
-        assert len(split[ key ].classes) > 0
+        assert len(split[ key ].class_counts.keys()) > 0
         assert len(split[ key ].examples) > 0
         total += len(split[ key ].examples)
     assert total == len(dataset)

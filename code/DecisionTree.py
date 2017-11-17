@@ -106,7 +106,7 @@ class DecisionTree:
 
     def _build_tree(self, data, attribute, used_attributes, depth = 0):
         if data.is_single_class():
-            return DecisionTreeLeaf(min(data.classes))
+            return DecisionTreeLeaf(min(data.class_counts.keys()))
         if depth == self.max_depth or len(data) <= self.min_dataset_size or not attribute:
             best = max(data.class_counts.items(), key = lambda x: x[ 1 ])[ 0 ]
             return DecisionTreeLeaf(best)
@@ -226,11 +226,11 @@ if __name__ == '__main__':
     classifier = DecisionTree(GiniAttributeSelector(), depth, min_size, parallel, leaf_size)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
-    metrics = Metric.process(accuracy, confusion_matrix, test_data.classes)
+    metrics = Metric.process(accuracy, confusion_matrix, test_data.class_counts.keys())
     Reporter.to_stdout(metrics, detailedOutput)
 
     if detailedOutput:
         accuracy, confusion_matrix = classifier.evaluate(train_data)
-        metrics = Metric.process(accuracy, confusion_matrix, train_data.classes)
+        metrics = Metric.process(accuracy, confusion_matrix, train_data.class_counts.keys())
         Reporter.to_stdout(metrics, detailedOutput)
         print('Finished in: ' + color.BOLD + str(time.time() - start) + color.END)
