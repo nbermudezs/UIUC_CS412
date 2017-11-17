@@ -12,25 +12,6 @@ except:
 import random
 
 class RandomSampler:
-    def _split(train_data, test_data, valid_size = 0.1):
-        examples = train_data.examples + test_data.examples
-        classes = train_data.classes ^ test_data.classes
-        attributes = train_data.available_attributes ^ test_data.available_attributes
-        combined = Dataset.from_data(examples, classes, attributes)
-
-        indices = list(range(0, len(examples)))
-        random.shuffle(indices)
-
-        train = Dataset()
-        test = Dataset()
-        for i, index in enumerate(indices):
-            if i < len(examples) * valid_size:
-                test.append(examples[ index ])
-            else:
-                train.append(examples[ index ])
-
-        return train, test
-
     def sample(data, size = 0.9):
         total = len(data)
         new_data = Dataset()
