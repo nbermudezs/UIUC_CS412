@@ -13,17 +13,21 @@ class GiniIndex:
 
     def index(self):
         if not self._index:
-            self._index = 1 - sum([
-                (n_D_j / self.D.n_samples)**2
-                for _, n_D_j in self.D.class_counts.items() ])
+            self._index = GiniIndex.calculate(self.D)
         return self._index
+
+    @staticmethod
+    def calculate(D):
+        return 1 - sum([
+            (n_D_j / D.n_samples)**2
+            for _, n_D_j in D.class_counts.items()])
 
     @functools.lru_cache(maxsize = 1024)
     def split(self, attribute):
         # True means it should not fill in the examples. We don't need them
         split = self.D.split_by_attribute(attribute, True)
         return sum([
-            len(D_j) / self.D.n_samples * GiniIndex(D_j).index()
+            len(D_j) / self.D.n_samples * GiniIndex.calculate(D_j)
             for _, D_j in split.items() ])
 
     @functools.lru_cache(maxsize = 1024)
