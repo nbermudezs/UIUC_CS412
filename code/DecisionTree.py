@@ -202,7 +202,7 @@ if __name__ == '__main__':
         best_accuracy = -float('inf')
         best_depth = 0
         best_minsize = 0
-        for depth in range(1, len(train_data.attributes) + 1, int(len(train_data.attributes) * 0.2)):
+        for depth in range(1, len(train_data.available_attributes) + 1, int(len(train_data.available_attributes) * 0.2)):
             for min_size in range(1, int(len(test_data) * 0.1), int(len(test_data) * 0.01)):
                 classifier = DecisionTree(GiniAttributeSelector(), depth, min_size)
                 classifier.train(train_data)

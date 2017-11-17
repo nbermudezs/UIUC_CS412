@@ -13,8 +13,8 @@ class Dataset:
     def __init__(self):
         self.examples = []
         self.classes = set()
-        self.attributes = set()
         self.available_attributes = set()
+        self.class_counts = {}
 
     @staticmethod
     def from_file(input_filepath):
@@ -29,7 +29,7 @@ class Dataset:
         dataset = Dataset()
         dataset.examples = examples
         dataset.classes = classes
-        dataset.attributes = attributes
+        dataset.available_attributes = attributes
         return dataset
 
     def items(self):
@@ -38,8 +38,8 @@ class Dataset:
     def append(self, item):
         self.examples.append(item)
         self.classes.add(item[ 1 ])
-        self.attributes = self.attributes.union(set(item[ 0 ].keys()))
-        self.available_attributes = self.available_attributes.union(set(item[ 0 ].keys()))
+        self.available_attributes.update(item[ 0 ].keys())
+        self.class_counts[ item[ 1 ] ] = self.class_counts.get(item[ 1 ], 0) + 1
 
     def __len__(self):
         return len(self.examples)

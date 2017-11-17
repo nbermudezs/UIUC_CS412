@@ -12,15 +12,15 @@ except:
 import random
 
 class RandomSampler:
-    def split(train_data, test_data, valid_size = 0.1):
+    def _split(train_data, test_data, valid_size = 0.1):
         examples = train_data.examples + test_data.examples
         classes = train_data.classes ^ test_data.classes
-        attributes = train_data.attributes ^ test_data.attributes
+        attributes = train_data.available_attributes ^ test_data.available_attributes
         combined = Dataset.from_data(examples, classes, attributes)
-        
+
         indices = list(range(0, len(examples)))
         random.shuffle(indices)
-        
+
         train = Dataset()
         test = Dataset()
         for i, index in enumerate(indices):
@@ -28,9 +28,9 @@ class RandomSampler:
                 test.append(examples[ index ])
             else:
                 train.append(examples[ index ])
-        
+
         return train, test
-    
+
     def sample(data, size = 0.9):
         total = len(data)
         new_data = Dataset()
@@ -41,8 +41,6 @@ class RandomSampler:
 if __name__ == '__main__':
     train = Dataset.from_file('../../data/balance.scale/balance.scale.train')
     test = Dataset.from_file('../../data/balance.scale/balance.scale.test')
-    train, test = RandomSampler.split(train, test)
+    train, test = RandomSampler._split(train, test)
     assert type(train) == Dataset
     assert type(test) == Dataset
-        
-        
