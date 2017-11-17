@@ -10,10 +10,11 @@ except:
     from LibSVMReader import LibSVMReader
 
 class Dataset:
-    def __init__(self):
-        self.examples = []
-        self.classes = set()
-        self.available_attributes = set()
+    def __init__(self, counts_only = False):
+        if not counts_only:
+            self.examples = []
+            self.classes = set()
+            self.available_attributes = set()
         self.class_counts = {}
         self.n_samples = 0
 
@@ -23,14 +24,6 @@ class Dataset:
         reader = LibSVMReader(input_filepath)
         for (features, label) in reader.read():
             dataset.append((features, label))
-        return dataset
-
-    @staticmethod
-    def from_data(examples, classes, attributes):
-        dataset = Dataset()
-        dataset.examples = examples
-        dataset.classes = classes
-        dataset.available_attributes = attributes
         return dataset
 
     def items(self):
@@ -52,8 +45,9 @@ class Dataset:
     and the values are Dataset objects containing the examples for
     that class only.
     Dataset.classes will only have one element
+    DO NOT USE ANYMORE
     '''
-    def split_by_class(self):
+    def _split_by_class(self):
         result = {}
         for (features, label) in self.examples:
             class_dataset = result.get(label, Dataset())
@@ -72,12 +66,15 @@ class Dataset:
         result = {}
         for (features, label) in self.examples:
             key = features[ attribute ]
-            dataset = result.get(key, Dataset())
+            dataset = result.get(key, Dataset(counts_only))
             dataset.append((features, label), counts_only)
             dataset.available_attributes = self.available_attributes
             result[ key ] = dataset
         return result
 
+    '''
+    For debugging only
+    '''
     def attribute_values(self, attribute):
         result = set()
         for (features, label) in self.examples:
@@ -94,7 +91,7 @@ if __name__ == '__main__':
     assert dataset.classes == set([ 1, 2, 3 ])
     assert not dataset.is_single_class()
 
-    split = dataset.split_by_class()
+    split = dataset._split_by_class()
     assert type(split) == dict
     assert set(split.keys()) == set([ 1, 2, 3 ])
     assert type(split[ 1 ]) == Dataset
