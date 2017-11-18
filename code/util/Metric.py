@@ -11,45 +11,46 @@ class Metric:
         result[ 'confusion_matrix' ] = confusion_matrix
         result[ 'class_order' ] = sorted(list(classes))
         result[ 'class_metrics' ] = {}
-        
+
         for _class in result[ 'class_order' ]:
             result[ 'class_metrics' ][ _class ] = Metric.class_metrics(_class, confusion_matrix)
-      
+
         return result
-    
+
     '''
     Parameters:
         - _class: label to consider
         - matrix: confusion matrix (multi class)
-    
+
     For meaning of variables see: https://en.wikipedia.org/wiki/Confusion_matrix
     '''
     def class_metrics(_class, matrix):
-        row = matrix[ _class ]
+        row = matrix.get(_class, { 'total': 0 })
         P = row[ 'total' ]
-        
+
         TP = row.get(_class, 0)
         TN = 0
         FN = P - TP
         FP = 0
-        
+
         for actual_label, count in matrix.items():
             if not actual_label == _class:
                 FP += matrix[ actual_label ].get(_class, 0)
                 TN += matrix[ actual_label ][ 'total' ] - matrix[ actual_label ].get(_class, 0)
-        
+
         N = FP + TN
-        
+
+        no_f_score = TP + FP + FN == 0
         return {
             'accuracy': (TP + TN) / (N + P),
-            'f-1 score': Metric._f_beta(TP, FP, FN),
-            'f-0.5 score': Metric._f_beta(TP, FP, FN, 0.5),
-            'f-2 score': Metric._f_beta(TP, FP, FN, 2),
+            'f-1 score': 0.0 if no_f_score else Metric._f_beta(TP, FP, FN),
+            'f-0.5 score': 0.0 if no_f_score else Metric._f_beta(TP, FP, FN, 0.5),
+            'f-2 score': 0.0 if no_f_score else Metric._f_beta(TP, FP, FN, 2),
             'precision': 0.0 if TP == 0 else TP / (TP + FP),
-            'recall': TP / P,
+            'recall': 0.0 if P == 0 else TP / P,
             'specificity': TN / (TN + FP)
         }
-    
+
     '''
     Implementation based on the formula found in Wikipedia.
     Ref: https://en.wikipedia.org/wiki/F1_score
