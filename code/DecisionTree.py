@@ -107,7 +107,7 @@ class DecisionTree:
     def _build_tree(self, data, attribute, used_attributes, depth = 0):
         if data.is_single_class():
             return DecisionTreeLeaf(min(data.class_counts.keys()))
-        if depth == self.max_depth or len(data) <= self.min_dataset_size or not attribute:
+        if depth == self.max_depth or len(data) < self.min_dataset_size or not attribute or len(data) < 2 * self.min_leaf_size:
             best = max(data.class_counts.items(), key = lambda x: x[ 1 ])[ 0 ]
             return DecisionTreeLeaf(best)
 
@@ -120,7 +120,7 @@ class DecisionTree:
         if self.min_leaf_size > 0:
             max_value = max(split.items(), key = lambda x: len(x[ 1 ]))[ 0 ]
         for value, dataset in split.items():
-            if (len(dataset)) <= self.min_leaf_size and value != max_value:
+            if (len(dataset)) < 2 * self.min_leaf_size and value != max_value:
                 best = max(data.class_counts.items(), key = lambda x: x[ 1 ])[ 0 ]
                 subtree.grow(value, DecisionTreeLeaf(best))
                 continue
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     DETAILS_FLAG = '--detailed-output'
 
     PARAMS = {
-        'balance.scale':    { 'depth':  3, 'min_dataset_size':  6, 'min_leaf_size':  1, 'parallel': False },
+        'balance.scale':    { 'depth': -1, 'min_dataset_size':  2, 'min_leaf_size':  1, 'parallel': False },
         'led':              { 'depth':  5, 'min_dataset_size':  1, 'min_leaf_size':  1, 'parallel': False }, # DONE
         'nursery':          { 'depth': -1, 'min_dataset_size':  1, 'min_leaf_size': -1, 'parallel': False }, # DONE
         'synthetic.social': { 'depth': 13, 'min_dataset_size': 66, 'min_leaf_size':  1, 'parallel':  True }  # DONE
