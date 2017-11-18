@@ -226,7 +226,7 @@ if __name__ == '__main__':
     classifier = DecisionTree(GiniAttributeSelector(), depth, min_size, parallel, leaf_size)
     classifier.train(train_data)
     accuracy, confusion_matrix = classifier.evaluate(test_data)
-    metrics = Metric.process(accuracy, confusion_matrix, test_data.class_counts.keys())
+    metrics = Metric.process(accuracy, confusion_matrix, train_data.class_counts.keys())
     Reporter.to_stdout(metrics, detailedOutput)
 
     if detailedOutput:
