@@ -4,8 +4,6 @@ __copyright__ = 'Copyright (C) 2017 Nestor Bermudez'
 __license__ = 'Public Domain'
 __version__ = '1.0'
 
-import functools
-
 class GiniIndex:
     @staticmethod
     def calculate(D):
@@ -14,7 +12,6 @@ class GiniIndex:
             for _, n_D_j in D.class_counts.items()])
 
     @staticmethod
-    @functools.lru_cache(maxsize = 1024)
     def split(D, attribute):
         # True means it should not fill in the examples. We don't need them
         split = D.split_counts_by_attribute(attribute)
@@ -23,7 +20,6 @@ class GiniIndex:
             for _, D_j in split.items() ])
 
     @staticmethod
-    @functools.lru_cache(maxsize = 1024)
     def impurity_reduction(D, attribute):
         return GiniIndex.calculate(D) - GiniIndex.split(D, attribute)
 
