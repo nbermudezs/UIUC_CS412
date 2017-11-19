@@ -1,2 +1,6 @@
 data/
 __pycache__
+*.aux
+*.log
+*.out
+*.gz
