@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
     PARAMS = {
         'synthetic.social': {
-            'size': 10,
+            'size': 70,
             'extremely_randomized': False,
             'data_bagging_size': 0.964951005853781,
             'feature_bagging_retention_p': 0.03156834830170488
@@ -159,7 +159,7 @@ if __name__ == '__main__':
         'balance.scale':    { 'depth': -1, 'min_dataset_size': 3, 'min_leaf_size':  8 }, # DONE
         'led':              { 'depth': -1, 'min_dataset_size': 1, 'min_leaf_size':  1 }, # DONE
         'nursery':          { 'depth': -1, 'min_dataset_size': 1, 'min_leaf_size': -1 }, # DONE
-        'synthetic.social': { 'depth': -1, 'min_dataset_size': 2, 'min_leaf_size':  1 }
+        'synthetic.social': { 'depth': -1, 'min_dataset_size': 3, 'min_leaf_size':  1 }
     }
 
     LOOP_PARAMS = {
