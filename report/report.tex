@@ -8,6 +8,8 @@
 \usepackage{multirow}
 \usepackage{multicol}
 
+\graphicspath{ {images/} }
+
 %% Local Macros and packages: add any of your own definitions here.
 
 \begin{document}
@@ -84,7 +86,7 @@ On top of the hyper-parameters for the Decision Tree I have three new ones for R
 \multicolumn{1}{ |c  }{}                        &
 \multicolumn{1}{ |l| }{Nursery} & -1 & 1 & -1 & 101 & 70 & 90   \\ \cline{2-8}
 \multicolumn{1}{ |c  }{}                        &
-\multicolumn{1}{ |l| }{Synthetic Social} & 6 & 94 & 1 & 1 & 2 & 3  \\ \cline{1-8}
+\multicolumn{1}{ |l| }{Synthetic Social} & -1 & 3 & 1 & 70 & 96.50 & 3.16  \\ \cline{1-8}
 \end{tabular}
 \captionof{table}{Hyper-parameters for every data set evaluated}
 \end{center}
@@ -173,6 +175,7 @@ And the metrics for the training set confusion matrix.
 
 Overall accuracy: \textbf{86\%}
 
+\pagebreak
 \subsubsection*{LED Data set}
 
 Measurements for the evaluation using the test data.
@@ -243,6 +246,7 @@ Per class metrics:
 
 Overall accuracy: \textbf{85\%}\\
 
+\pagebreak
 \subsubsection*{Nursery Data set}
 
 Measurements when evaluating the classifier with the test data.
@@ -324,6 +328,7 @@ Per class metrics:
 
 Overall accuracy: \textbf{100\%}
 
+\pagebreak
 \subsubsection*{Synthetic Social Data set}
 
 Measurements when evaluating the classifier with the test data.
@@ -403,6 +408,8 @@ Per class metrics:
 Overall accuracy: \textbf{56.9\%}\\
 
 
+
+\pagebreak
 \subsection*{Random Forest}
 \subsubsection*{Balance Scale Data set}
 
@@ -479,6 +486,7 @@ And the metrics for the training set confusion matrix.
 
 Overall accuracy: \textbf{87.5\%}
 
+\pagebreak
 \subsubsection*{LED Data set}
 
 Measurements for the evaluation using the test data.
@@ -549,6 +557,7 @@ Per class metrics:
 
 Overall accuracy: \textbf{85.91\%}\\
 
+\pagebreak
 \subsubsection*{Nursery Data set}
 
 Measurements when evaluating the classifier with the test data.
@@ -630,14 +639,192 @@ Per class metrics:
 
 Overall accuracy: \textbf{99.83\%}
 
+\pagebreak
 \subsubsection*{Synthetic Social Data set}
+
+For this data set I'll present two different results. One of them with the maximum number of trees that would still run under 180 seconds in my computer and the other one executed in EWS also under the time constraint. \\
+
+When running in my computer I could set the number of trees to 200 and the execution took \textbf{168.36} seconds. The results are these:
+
+\begin{center}
+\begin{tabular}{cc|r|r|r|r|r|}
+\cline{3-6}
+& & \multicolumn{4}{ c| }{Predicted class} \\ \cline{3-6}
+& & 1 & 2 & 3 & 4 \\ \cline{1-6}
+\multicolumn{1}{ |c  }{\multirow{4}{*}{Expected class} } &
+\multicolumn{1}{ |r| }{1} & 208 & 3 & 20 & 37    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{2} & 9 & 164 & 32 & 40    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{3} & 24 & 24 & 178 & 6    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{4} & 20 & 22 & 2 & 211  \\ \cline{1-6}
+\end{tabular}
+\captionof{table}{Confusion matrix for test data using 200 trees.}
+\end{center}
+
+Per class metrics for evaluation using the test data:
+\begin{center}
+\begin{tabular}{c|r|r|r|r|}
+\cline{2-5}
+& \multicolumn{4}{ c| }{Class} \\ \cline{2-5}
+& 1 & 2 & 3 & 4  \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 88.70 & 87.00 & 89.20 & 87.30   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-1 Score} & 78.64 & 71.62 & 76.72 & 76.87   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-0.5 Score} & 68.73 & 45.27 & 76.72 & 80.29   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-2 Score} & 79.27 & 74.75 & 76.72 & 73.22   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Precision} & 79.69 & 77.00 & 76.72 & 71.77   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Recall} & 77.61 & 66.94 & 76.72 & 82.75   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 92.76 & 93.51 & 92.97 & 88.86   \\ \cline{1-5}
+\end{tabular}
+\captionof{table}{Metrics (percentages) per class for test data set using 200 trees.}
+\end{center}
+
+Overall accuracy: \textbf{76.1\%}\\
+
+I also ran the same setup against the training data set and these are the results.
+
+\begin{center}
+\begin{tabular}{cc|r|r|r|r|r|}
+\cline{3-6}
+& & \multicolumn{4}{ c| }{Predicted class} \\ \cline{3-6}
+& & 1 & 2 & 3 & 4 \\ \cline{1-6}
+\multicolumn{1}{ |c  }{\multirow{4}{*}{Expected class} } &
+\multicolumn{1}{ |r| }{1} & 731 & 0 & 0 & 1    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{2} & 0 & 755 & 0 & 0    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{3} & 0 & 0 & 768 & 0    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{4} & 0 & 0 & 0 & 745  \\ \cline{1-6}
+\end{tabular}
+\captionof{table}{Confusion matrix for training data using 200 trees.}
+\end{center}
+
+Per class metrics for evaluation using the training data:
+\begin{center}
+\begin{tabular}{c|r|r|r|r|}
+\cline{2-5}
+& \multicolumn{4}{ c| }{Class} \\ \cline{2-5}
+& 1 & 2 & 3 & 4  \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 99.97 & 100.0 & 100.0 & 99.97   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-1 Score} & 99.93 & 100.0 & 100.0 & 99.93   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-0.5 Score} & 99.89 & 100.0 & 100.0 & 99.97   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-2 Score} & 99.97 & 100.0 & 100.0 & 99.89   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Precision} & 100.0 & 100.0 & 100.0 &99.87   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Recall} & 99.86 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 100.0 & 100.0 & 100.0 & 99.96   \\ \cline{1-5}
+\end{tabular}
+\captionof{table}{Metrics (percentages) per class for training data set using 200 trees.}
+\end{center}
+
+Overall accuracy: \textbf{99.97\%}\\
+
+When running in EWS I had to lower the number of trees to make it run under 180 seconds. Instead of using 200 trees I used 70. The execution time was 147.01 seconds These are the results:
+
+\begin{center}
+\begin{tabular}{cc|r|r|r|r|r|}
+\cline{3-6}
+& & \multicolumn{4}{ c| }{Predicted class} \\ \cline{3-6}
+& & 1 & 2 & 3 & 4 \\ \cline{1-6}
+\multicolumn{1}{ |c  }{\multirow{4}{*}{Expected class} } &
+\multicolumn{1}{ |r| }{1} & 205 & 6 & 28 & 29    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{2} & 12 & 165 & 30 & 38    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{3} & 24 & 26 & 180 & 2    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{4} & 30 & 20 & 1 & 204  \\ \cline{1-6}
+\end{tabular}
+\captionof{table}{Confusion matrix for test data using 70 trees.}
+\end{center}
+
+Per class metrics for evaluation using the test data:
+\begin{center}
+\begin{tabular}{c|r|r|r|r|}
+\cline{2-5}
+& \multicolumn{4}{ c| }{Class} \\ \cline{2-5}
+& 1 & 2 & 3 & 4  \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 87.10 & 86.8 & 88.90 & 88.00   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-1 Score} & 76.07 & 71.43 & 76.43 & 77.27   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-0.5 Score} & 76.32 & 68.92 & 77.12 & 78.89   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-2 Score} & 75.81 & 74.12 & 75.76 & 75.72   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Precision} & 75.65 & 76.04 & 75.31 & 74.73   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Recall} & 76.49 & 67.35 & 77.59 & 80.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 90.98 & 93.11 & 92.32 & 90.74   \\ \cline{1-5}
+\end{tabular}
+\captionof{table}{Metrics (percentages) per class for test data set using 70 trees.}
+\end{center}
+
+Overall accuracy: \textbf{75.4\%}\\
+
+Finally, lets look at the results of running the Random Forest with 70 trees and evaluate it using the training data.
+
+\begin{center}
+\begin{tabular}{cc|r|r|r|r|r|}
+\cline{3-6}
+& & \multicolumn{4}{ c| }{Predicted class} \\ \cline{3-6}
+& & 1 & 2 & 3 & 4 \\ \cline{1-6}
+\multicolumn{1}{ |c  }{\multirow{4}{*}{Expected class} } &
+\multicolumn{1}{ |r| }{1} & 732 & 0 & 0 & 0    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{2} & 0 & 755 & 0 & 0    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{3} & 0 & 0 & 768 & 0    \\ \cline{2-6}
+\multicolumn{1}{ |c  }{}                        &
+\multicolumn{1}{ |r| }{4} & 0 & 0 & 0 & 745  \\ \cline{1-6}
+\end{tabular}
+\captionof{table}{Confusion matrix for training data using 70 trees.}
+\end{center}
+
+Per class metrics for evaluation using the training data:
+\begin{center}
+\begin{tabular}{c|r|r|r|r|}
+\cline{2-5}
+& \multicolumn{4}{ c| }{Class} \\ \cline{2-5}
+& 1 & 2 & 3 & 4  \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy} & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-1 Score}  & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-0.5 Score}  & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{F-2 Score}  & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Precision} & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Recall}  & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\multicolumn{1}{ |l| }{Accuracy}  & 100.0 & 100.0 & 100.0 & 100.0   \\ \cline{1-5}
+\end{tabular}
+\captionof{table}{Metrics (percentages) per class for training data set using 70 trees.}
+\end{center}
+
+Overall accuracy: \textbf{100.0\%}\\
 
 \section*{Conclusions}
 
-It is evident that in general ensemble methods, specifically Random Forest, yield a better performance than a single Decision Tree. \\
+It is evident that in general ensemble methods, specifically Random Forest, yield a better performance than a single Decision Tree, as shown in the charts below.\\
+
+\begin{center}
+\includegraphics[scale=0.7]{overall-train.png}
+\captionof{figure}{Comparison of overall accuracy when evaluated in the training data set.}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.7]{overall-test.png}
+\captionof{figure}{Comparison of overall accuracy when evaluated in the test data set.}
+\end{center}
 
 From the four data sets considered the Nursery data set did not improve considerable when using Random Forest. Another thing to note is that there are only two examples of the class 5 in this data set. The accuracy of the Random Forest oscilated between 97.4 and 97.7\% depending on whether those two elements ended up included in the data bag for some of the trees or not. Being higher when not included, which makes sense since there are no examples for the class in the test data so there is no chance of miss-classification. \\
 
-Everything was executed in a MacBook Pro Mid 2015, 16GB RAM, i7 Processor and validated that would run under time constraints in the EWS Linux system (shared 128GB RAM, 24 cores). \\Even though the EWS system is more powerful the performance was better in my personal laptop. It seems to be a cap on the CPU time you can use simultaneously in EWS. When using the 24 cores I was only using like 15\% on each but when I changed to using only 5 cores they were all performed at 95\%. 
+Everything was executed in a MacBook Pro Mid 2015, 16GB RAM, i7 Processor and validated that would run under time constraints in the EWS Linux system (shared 128GB RAM, 24 cores). Even though the EWS system is more powerful the performance was better in my personal laptop. It seems to be a cap on the CPU time you can use simultaneously in EWS. When using the 24 cores I was only using like 15\% on each but when I changed to using only 5 cores they were all performed at 95\%. \\
+
+\subsection*{Balance Scale Data set}
+
+\subsection*{LED Data set}
+
+\subsection*{Nursery Data set}
+Although the results for Random Forest show an slight improvement over the Decision Tree, there were some cases in which the overall accuracy was slightly below 97.43\%. The only logical explanation for this is that, because of the number of trees and data bagging, there were some branches that were noisy. \\
+
+For this particular data set the improvement is so small that, in my opinion, does not justify the added performance cost.
+
+\subsection*{Synthetic Social Data set}
+For this particular data set the improvement given by Random Forest is considerable. The classifier went from \textbf{49.2\%} to \textbf{76.1\%}; that represents a \textbf{54\%} improvement!
+
 
 \end{document}
