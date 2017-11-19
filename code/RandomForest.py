@@ -134,7 +134,7 @@ if __name__ == '__main__':
             'extremely_randomized': False,
             'data_bagging_size': 0.964951005853781,
             'feature_bagging_retention_p': 0.03156834830170488
-        }, # NOT DONE
+        }, # DONE
         'balance.scale': {
             'size': 41,
             'extremely_randomized': False,
