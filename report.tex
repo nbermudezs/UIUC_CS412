@@ -79,6 +79,62 @@ ii) Specificity: measures how successful is the classifier in predicting false w
 
 \section*{Question 2}
 
+\textbf{2a}: since $k = 1$ this is rather simple. For every example in the test data we calculate the distance to every exampled seen in the training data. The following table summarizes this and marks the minimum distance in green.
+\begin{center}
+\includegraphics[scale=0.75]{distances.png}
+\end{center}
+
+The first 4 rows in the matrix correspond to the training examples that belong to class +1 and the other half the ones that belong to class -1. So, the predicted classes for the test data are: -1, +1, -1 and -1 respectively. And the actual classes are +1, +1, -1, -1 so only the first one was miss-classified and, therefore, the accuracy is $\frac{3}{4} = $ \textbf{0.75} and the error is \textbf{25\%}.\\
+
+\textbf{2b}: when using $k = 3$ the distance matrix doesn't change but now 3 points "vote" to decide the class to assign to each example. The 3 closest points to each test example are highlighted in green in the following table:
+\begin{center}
+\includegraphics[scale=0.75]{3-nn-distances.png}
+\end{center}
+So for the first test example (2.7, 2.7) two of the three closest points are +1 so it will be classified as +1; for the second example (2.5, 1) all three points are +1 so its class is +1; for (1.5, 2.5) all three are -1 so its class -1 and, finally, (1.2, 1) will be classified as +1. \\
+Only the last prediction is wrong so the accuracy of the model in this case is also \textbf{0.75} and the error rate is \textbf{25\%}.\\
+
+\textbf{2c}: lets look at the scatter plot shown in the HW description.
+\begin{center}
+\includegraphics[scale=0.55]{q2-dataplot-ref.png}
+\end{center}
+
+What I'll do to find the linear classifier is to take the two points on the bottom-left corner, draw the line that joins them (lets call it $L_1$), take the midpoint ($M_1$) and find the perpendicular line ($L_2$) to $L_1$ that passes through $M_1$. The next image illustrates this:
+\begin{center}
+\includegraphics[scale=0.75]{q2-dataplot.png}
+\end{center}
+
+The two points into consideration are (0.8, 1) and (1, 0.5). The first one belongs to class +1. The slope of $L_1$ is given by 
+\[ m_1 = \frac{x2_+ - x2_-}{x1_+ - x1_-} = \frac{1 - 0.5}{0.8 - 1} = -2.5 \]
+
+And the midpoint $M_1$ is given by
+\[ (\frac{x1_+ + x1_-}{2}, \frac{x2_+ + x2_-}{2}) = (0.9, 0.75) \]
+
+Finally, to find a perpendicular to a line we need the product of the slopes to be -1. So the slope of $L_2$ is 0.4. So $x2 = 0.4x1 + b$, when evaluating in the midpoint we have that $0.75 = 0.4\times 0.9 + b \rightarrow b = 0.39 $. As a result the line we are looking for is:
+\[ f(x) = 0.4x_1 - x_2 + 0.39 \]
+
+The following table shows the value resulting of evaluating $f(x)$ on each data example (both training and test).
+
+\begin{center}
+\includegraphics[scale=0.75]{linear.png}
+\end{center}
+
+I was expecting to see a perfect accuracy but it wasn't the case. After a while I realized that the problem is that the scale on the axis x1 and x2 in the scatter plot are not equal so, even though $L_2$ seemed like a good fit it really wasn't. The accuracy for the training data set is $\frac{5}{8} = 62.5\%$ while the accuracy in the test data set is \textbf{75\%}.\\
+
+A different way to find $f(x)$ would be to take the same midpoint $M_1$ we already found and take a second midpoint from the segment that joins (1.2, 1.9) and (2, 1.2). The reason for choosing these two points is that it looks like line drawn before passes through its midpoint. Lets call this point $M_2$. Its coordinate would be (1.7, 1.95). \\
+
+Now we just need to find a line that passes through $M_1$ and $M_2$. Following the same steps as before we have that $f(x) = 1.5x1 - x2 - 0.6$.\\
+
+Now lets look at the table evaluating the function on all the examples.
+\begin{center}
+\includegraphics[scale=0.75]{linear2.png}
+\end{center}
+
+This time the accuracy on the training data set is \textbf{100\%} and the accuracy on the test data set is \textbf{75\%}. Since the question is asking about the error:\\
+Training error is \textbf{0\%}\\
+Testing error is \textbf{25\%}\\
+
+\textbf{2d}: for this particular data set both method perform equally well. In general $k$ Nearest Neighbor is good when you have low dimensional data and many examples but this is not the case here; we do have low dimensional data but also just a few examples. As mentioned earlier in this report, there is no "one size fit all" solution and you usually have to experiment with different methods. Regardless of that, there are some particular scenarios in which one is better than the other. When we have lots of data entries KNN may not be a good fit because the computational complexity could explode. 
+
 \section*{Question 3}
 
 \end{document}
