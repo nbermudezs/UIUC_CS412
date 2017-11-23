@@ -137,4 +137,134 @@ Testing error is \textbf{25\%}\\
 
 \section*{Question 3}
 
+\textbf{3a}: start centroids are (0, 4) and (6, 5). In the first iteration we calculate the distance from the centroids to every point in our data. I'm using Euclidean distance and the results are shown in the following table:
+
+\begin{center}
+\includegraphics[scale=0.75]{kmeans-iter0.png}
+\captionof{table}{Distances from centroid to data points. First iteration.}
+\end{center}
+
+In this table the green cells indicate the minimum distance between the two cluster centroids. As a result the points (1, 3), (1, 2), (2, 1), (2, 2), (2, 3) and (3, 2) are clustered together and the remaining 7 points in another one.\\
+
+The next step is to update the centroid by taking the mean of the points included on each cluster. For the first 6 points the mean is \textbf{(1.83, 2.17)}, and for the other cluster, the new centroid is \textbf{(5, 4.14)}.\\
+
+Now we need to recalculate the distances using the new centroids:
+\begin{center}
+\includegraphics[scale=0.75]{kmeans-iter1.png}
+\captionof{table}{Distances from centroid to data points. Second iteration}
+\end{center}
+
+After updating the distance we notice that the elements on each cluster remained the same so if we take the means again we would get the same centroids. Because of this, we can stop at this point. So the final result is that the first 6 points belong to cluster 1 and the other 7 to cluster 2.\\
+
+\textbf{3b}:  the first step is to mark all the objects as unvisited and select a random one. Then we calculate the distance from that selected object to all others and count how many there are in the $\epsilon$-neighborhood. See the following table:
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter0.png}
+\captionof{table}{Iteration 0 of the DBSCAN clustering algorithm.}
+\end{center}
+
+The items marked on teal color are the ones that belong to the neighborhood. Since there are more than \textit{MinPts} we will mark the selected point as visited and create our first cluster $C1$. Now we iterate over the points in the neighbor (from top to bottom).
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter1.png}
+\captionof{table}{Iteration 1 of the DBSCAN clustering algorithm.}
+\end{center}
+
+Note that now the distance is calculated from the selected point (1, 2). Since it has 3 objects in its neighborhood we will iterate over those too. 
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter2.png}
+\captionof{table}{Iteration 2 of the DBSCAN clustering algorithm.}
+\end{center}
+
+The objects in (1, 3) neighborhood were already included so we keep going.
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter3.png}
+\captionof{table}{Iteration 3 of the DBSCAN clustering algorithm.}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter4.png}
+\captionof{table}{Iteration 4 of the DBSCAN clustering algorithm.}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter5.png}
+\captionof{table}{Iteration 5 of the DBSCAN clustering algorithm.}
+\end{center}
+
+Since (4, 3) hasn't been included so far, we will include it.
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter6.png}
+\captionof{table}{Iteration 6 of the DBSCAN clustering algorithm.}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.60]{dbscan-iter7.png}
+\captionof{table}{Iteration 7 of the DBSCAN clustering algorithm.}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.57]{dbscan-iter8.png}
+\captionof{table}{Iteration 8 of the DBSCAN clustering algorithm.}
+\end{center}
+
+At this point we can see that all the unvisited elements will eventually be assigned to cluster $C1$ so we are done.
+
+\begin{center}
+\includegraphics[scale=0.57]{dbscan-final.png}
+\captionof{table}{Final state of the DBSCAN clustering algorithm.}
+\end{center}
+
+This result matches the result obtained by using sklearn with the same hyper-parameters. The code can be found together with this report.\\
+
+\textbf{3c}: consider the initial state
+
+\begin{center}
+\includegraphics[scale=0.57]{agnes-0.png}
+\captionof{figure}{Initial state for the AGNES clustering algorithm.\\ A cluster is considered the same if it has the same shape and color. So in this plot, all 13 points belong to a different cluster.}
+\end{center}
+
+The dissimilarity matrix is as follows:
+\begin{center}
+\includegraphics[scale=0.47]{agnes-table.png}
+\captionof{table}{Dissimilarity matrix for all points.}
+\end{center}
+
+The bold numbers are the ones with minimum dissimilarity. After merging we have:
+\begin{center}
+\includegraphics[scale=0.57]{agnes-1.png}
+\captionof{figure}{First merge of clusters.}
+\end{center}
+
+The next iteration results in:
+\begin{center}
+\includegraphics[scale=0.57]{agnes-2.png}
+\captionof{figure}{Second merge of clusters.}
+\end{center}
+
+And for the next one we merge two clusters twice:
+\begin{center}
+\includegraphics[scale=0.57]{agnes-3.png}
+\captionof{figure}{Third merge of clusters.}
+\end{center}
+
+On the fourth iteration we finally have just two clusters that match the ones found in part 3a. 
+\begin{center}
+\includegraphics[scale=0.57]{agnes-4.png}
+\captionof{figure}{Fourth merge of clusters.}
+\end{center}
+
+We could perform one more merge and end up with a single cluster. I won't do it because it is obvious what the result is  and the process is already evident.\\
+
+Finally, below there is the dendrogram to illustrate the merging of the different clusters. At the lowest level, cluster $i$ is the $i$-th element in our data.
+
+\begin{center}
+\includegraphics[scale=0.57]{dendrogram.png}
+\captionof{figure}{Dendrogram for our AGNES algorithm.}
+\end{center}
+
+
 \end{document}
